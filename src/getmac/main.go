@@ -7,6 +7,15 @@ import "log"
 import "strings"
 import "net/http"
 
+/**
+
+getmac starts an HTTP server on 8080 that returns nothing but this contain's first MAC address
+as listed when executing "ip a".
+
+For demo purposes only.
+
+**/
+
 func getMAC() string {
 	cmd := exec.Command("ip", "a")
 	stdout, err := cmd.StdoutPipe()
@@ -37,6 +46,9 @@ func main() {
 }
 
 /*
+EXAMPLE OUTPUT of "ip a":
+
+
 1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1
     link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
     inet 127.0.0.1/8 scope host lo
