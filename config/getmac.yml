@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: getmac
+  labels:
+    app: getmac
+spec:
+  containers:
+   - image: 192.168.178.80:5000/getmac:v2
+     name: getmac
+     ports:
+      - containerPort: 8080
+        name: http
+        protocol: TCP
+
