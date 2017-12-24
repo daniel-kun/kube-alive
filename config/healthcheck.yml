@@ -1,0 +1,43 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: healthcheck-deployment
+  labels:
+    app: healthcheck
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: healthcheck
+  template:
+    metadata:
+      labels:
+        app: healthcheck
+    spec:
+      containers:
+      - name: healthcheck
+        image: 192.168.178.80:5000/healthcheck:v3
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+          initialDelaySeconds: 3
+          periodSeconds: 1
+          failureThreshold: 1
+        ports:
+        - containerPort: 8080
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: healthcheck
+spec:
+  externalIPs:
+  - 192.168.178.80
+  selector:
+    app: healthcheck
+  ports:
+  - protocol: TCP
+    port: 81
+    targetPort: 8080
+

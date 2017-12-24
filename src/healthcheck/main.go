@@ -21,7 +21,7 @@ func main() {
     if healthy {
       fmt.Fprintf(w, "Hi, I'm alive an healthy!")
     } else {
-      fmt.Fprintf(w, "Ugh, I'm not feeling so well...")
+      http.Error(w, "Ugh, I'm not feeling so well...", http.StatusServiceUnavailable);
     }
 	})
   http.HandleFunc("/infect", func(w http.ResponseWriter, r *http.Request) {

@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: getmac-deployment
   labels:
-    app: getma6c
+    app: getmac
 spec:
   replicas: 4
   selector:
