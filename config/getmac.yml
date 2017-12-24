@@ -1,12 +1,10 @@
-apiVersion: apps/v1
-kind: ReplicaSet
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
 metadata:
-  name: getmac
+  name: getmac-deployment
   labels:
-    app: getmac
+    app: getma6c
 spec:
-  # this replicas value is default
-  # modify it according to your case
   replicas: 4
   selector:
     matchLabels:
@@ -19,14 +17,8 @@ spec:
       containers:
       - name: getmac
         image: 192.168.178.80:5000/getmac:v2
-        resources:
-          requests:
-            cpu: 100m
-            memory: 100Mi
         ports:
         - containerPort: 8080
-          name: http
-          protocol: TCP
 ---
 kind: Service
 apiVersion: v1
