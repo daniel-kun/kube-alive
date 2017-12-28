@@ -1,4 +1,4 @@
-module LoadBalancing exposing (LoadBalancingModel, view, init, Msg(ExecLoadBalanceTest, ReceiveLoadBalanceResponse))
+module LoadBalancing exposing (Model, init, update, view, Msg(ExecLoadBalanceTest, ReceiveLoadBalanceResponse))
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
@@ -11,32 +11,46 @@ type Msg =
       ExecLoadBalanceTest 
     | ReceiveLoadBalanceResponse (Result Http.Error String)
 
+type alias Container c = {
+    c | loadBalancing : Model
+}
+
 -- MODEL
 
-type alias LoadBalancingModel =
+type alias Model =
     { responses: List String
     }
 
 -- FUNCTIONS
 
-init = LoadBalancingModel []
+init = Model []
 
-renderLoadBalancingResponse : (String, Int) -> Html msg
-renderLoadBalancingResponse response =
+
+renderLoadBalancing : Model -> { name: String, status: String, app: String, podIP: String } -> Html msg
+renderLoadBalancing loadBalancing pod =
     tr [] [
-        td [] [text <| Tuple.first response],
-        td [] [text <| (Tuple.second response |> toString)]
+        td [] [text <| pod.name ],
+        td [] [text <| pod.status ],
+        td [] [text <| toString (List.Extra.count (\n -> n == pod.podIP) loadBalancing.responses), text <| " responses" ]
     ]
 
-responsesWithCount : List String -> List (String, Int)
-responsesWithCount responses =
-    List.map (\n -> (,) n (List.Extra.count ((==) n) responses)) (List.sort (List.Extra.unique responses))
-
-view : (Msg -> m) -> List { name: String, uid: String, app: String, status: String } -> LoadBalancingModel -> Html m
+view : (Msg -> m) -> List { name: String, status: String, app: String, podIP: String } -> Model -> List (Html m)
 view makeMsg podList loadBalancing =
-    div [] [
-        button [ onClick (makeMsg ExecLoadBalanceTest) ] [text "Make 50 requests to getmac"]
---        table [] (List.map renderPodRow ),
---        table [] (List.map renderLoadBalancingResponse (responsesWithCount loadBalancing.responses))
+    [
+        button [ onClick (makeMsg ExecLoadBalanceTest) ] [text "Make 50 requests to getmac"],
+        table [] (List.map (renderLoadBalancing loadBalancing) (List.filter (\n -> n.app == "getmac") podList))
     ]
+
+update : (Msg -> msg) -> Msg -> Container c -> (Container c, Cmd msg)
+update makeMsg msg model =
+    case msg of
+        ExecLoadBalanceTest ->
+            (model, Cmd.batch (List.repeat 50 (Http.send (\m -> makeMsg (ReceiveLoadBalanceResponse m)) (Http.getString "http://192.168.178.80:83/getmac"))))
+        ReceiveLoadBalanceResponse (Ok response) ->
+            let
+                loadBalancing = model.loadBalancing
+            in
+                ({ model | loadBalancing = { loadBalancing | responses = response :: loadBalancing.responses }}, Cmd.none)
+        ReceiveLoadBalanceResponse (Err _) ->
+            (model, Cmd.none)
 
