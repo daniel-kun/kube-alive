@@ -7,7 +7,7 @@ import Http exposing (get, send)
 import KubernetesApiModel exposing (KubernetesResultMetadata, KubernetesPodResult, KubernetesPodItem, KubernetesPodMetadata, KubernetesLabels, KubernetesPodStatus, KubernetesPodCondition, KubernetesPodUpdate)
 import KubernetesApiDecoder exposing (decodeKubernetesPodResult, decodeKubernetesPodUpdate)
 import Json.Decode exposing (decodeString)
-import List.Extra
+import LoadBalancing exposing (LoadBalancingModel)
 
 main =
   Html.program
@@ -26,12 +26,6 @@ type alias PodInfo =
     , status: String
     }
 
-type alias LoadBalancingModel =
-    { responses: List String
-    }
-
-initLoadBalancing = LoadBalancingModel []
-
 type alias Model =
   {   lastMsg : Msg
     , podList : List PodInfo
@@ -42,7 +36,7 @@ type alias Model =
 
 init : (Model, Cmd Msg)
 init =
-  (Model Idle [] "" "(Loading)" initLoadBalancing, Http.send PodList (Http.get "http://192.168.178.80:83/api/v1/namespaces/default/pods" decodeKubernetesPodResult))
+  (Model Idle [] "" "(Loading)" LoadBalancing.init, Http.send PodList (Http.get "http://192.168.178.80:83/api/v1/namespaces/default/pods" decodeKubernetesPodResult))
 
 -- UPDATE
 
@@ -50,8 +44,7 @@ type Msg =
       Idle
     | PodList (Result Http.Error KubernetesPodResult) 
     | PodUpdate String
-    | ExecLoadBalanceTest 
-    | ReceiveLoadBalanceResponse (Result Http.Error String)
+    | LoadBalancingMsg LoadBalancing.Msg 
 
 makePodInfoStatus : KubernetesPodItem -> String
 makePodInfoStatus item =
@@ -108,15 +101,15 @@ update msg model =
                     ({ model | podList = (updatePodList model.podList podUpdates) }, Cmd.none)
                 Err errorMessage ->
                     ({ model | debugText = errorMessage }, Cmd.none)
-    ExecLoadBalanceTest ->
+    LoadBalancingMsg LoadBalancing.ExecLoadBalanceTest ->
         ({ model | debugText = "Starting requests..." }, 
-            Cmd.batch (List.repeat 50 (Http.send ReceiveLoadBalanceResponse (Http.getString "http://192.168.178.80:83/getmac"))))
-    ReceiveLoadBalanceResponse (Ok response) ->
+            Cmd.batch (List.repeat 50 (Http.send (\msg -> LoadBalancingMsg (LoadBalancing.ReceiveLoadBalanceResponse msg)) (Http.getString "http://192.168.178.80:83/getmac"))))
+    LoadBalancingMsg (LoadBalancing.ReceiveLoadBalanceResponse (Ok response)) ->
         let
             loadBalancing = model.loadBalancing
         in 
             ({ model | loadBalancing = { loadBalancing | responses = response :: loadBalancing.responses}, lastMsg = msg, debugText = response }, Cmd.none)
-    ReceiveLoadBalanceResponse (Err _) ->
+    LoadBalancingMsg (LoadBalancing.ReceiveLoadBalanceResponse (Err _)) ->
         ({ model | debugText = "Load balancing test failed", lastMsg = msg }, Cmd.none)
 
 -- SUBSCRIPTIONS
@@ -138,24 +131,11 @@ renderPodRow podInfo =
         td [] [ text podInfo.status ]
     ]
 
-renderLoadBalancingResponse : (String, Int) -> Html msg
-renderLoadBalancingResponse response =
-    tr [] [
-        td [] [text <| Tuple.first response],
-        td [] [text <| (Tuple.second response |> toString)]
-    ]
-
-responsesWithCount : List String -> List (String, Int)
-responsesWithCount responses =
-    List.map (\n -> (,) n (List.Extra.count ((==) n) responses)) (List.sort (List.Extra.unique responses))
-
 view : Model -> Html Msg
 view model =
   div []
     [ 
         text model.debugText,
-        button [ onClick ExecLoadBalanceTest ] [text "Make 50 requests to getmac"],
-        table [] (List.map renderPodRow model.podList),
-        table [] (List.map renderLoadBalancingResponse (responsesWithCount model.loadBalancing.responses))
+        LoadBalancing.view LoadBalancingMsg model.podList model.loadBalancing
     ]
 
