@@ -1,9 +1,15 @@
-module LoadBalancing exposing (Model, init, update, view, Msg(ExecLoadBalanceTest, ReceiveLoadBalanceResponse))
+module LoadBalancing exposing (Model, Msg(ExecLoadBalanceTest, ReceiveLoadBalanceResponse), init, update, view)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import Http exposing (get, send)
 import List.Extra
+
+-- MODEL
+
+type alias Model =
+    { responses: List String
+    }
 
 -- MSG
 
@@ -14,12 +20,6 @@ type Msg =
 type alias Container c = {
     c | loadBalancing : Model
 }
-
--- MODEL
-
-type alias Model =
-    { responses: List String
-    }
 
 -- FUNCTIONS
 
@@ -37,6 +37,7 @@ renderLoadBalancing loadBalancing pod =
 view : (Msg -> m) -> List { name: String, status: String, app: String, podIP: String } -> Model -> List (Html m)
 view makeMsg podList loadBalancing =
     [
+        h1 [] [ text "Example 1: Load-Balancing" ],
         button [ onClick (makeMsg ExecLoadBalanceTest) ] [text "Make 50 requests to getmac"],
         table [] (List.map (renderLoadBalancing loadBalancing) (List.filter (\n -> n.app == "getmac") podList))
     ]

@@ -8,6 +8,7 @@ import KubernetesApiModel exposing (KubernetesResultMetadata, KubernetesPodResul
 import KubernetesApiDecoder exposing (decodeKubernetesPodResult, decodeKubernetesPodUpdate)
 import Json.Decode exposing (decodeString)
 import LoadBalancing
+import SelfHealing
 
 main =
   Html.program
@@ -32,12 +33,13 @@ type alias Model =
     , podList : List PodInfo
     , podListResourceVersion : String
     , debugText : String
-    , loadBalancing: LoadBalancing.Model
+    , loadBalancing : LoadBalancing.Model
+    , selfHealing : SelfHealing.Model
   }
 
 init : (Model, Cmd Msg)
 init =
-  (Model Idle [] "" "(Loading)" LoadBalancing.init, Http.send PodList (Http.get "http://192.168.178.80:83/api/v1/namespaces/default/pods" decodeKubernetesPodResult))
+  (Model Idle [] "" "(Loading)" LoadBalancing.init SelfHealing.init, Http.send PodList (Http.get "http://192.168.178.80:83/api/v1/namespaces/default/pods" decodeKubernetesPodResult))
 
 -- UPDATE
 
@@ -46,6 +48,7 @@ type Msg =
     | PodList (Result Http.Error KubernetesPodResult) 
     | PodUpdate String
     | LoadBalancingMsg LoadBalancing.Msg 
+    | SelfHealingMsg SelfHealing.Msg
 
 makePodInfoStatus : KubernetesPodItem -> String
 makePodInfoStatus item =
@@ -110,6 +113,8 @@ update msg model =
                     ({ model | debugText = errorMessage }, Cmd.none)
     LoadBalancingMsg msg ->
         LoadBalancing.update LoadBalancingMsg msg model
+    SelfHealingMsg msg ->
+        SelfHealing.update SelfHealingMsg msg model
 
 -- SUBSCRIPTIONS
 
@@ -130,7 +135,9 @@ view model =
         div [ style [("width", "100%")] ]
             [
                 div [ style [("margin", "5px"), ("backgroundColor", "#962E2E"), ("color", "white"), ("padding", "15px")] ]
-                    (LoadBalancing.view LoadBalancingMsg (List.map (\n -> { name = n.name, status = n.status, app = n.app, podIP = n.podIP }) model.podList) model.loadBalancing)
+                    (LoadBalancing.view LoadBalancingMsg (List.map (\n -> { name = n.name, status = n.status, app = n.app, podIP = n.podIP }) model.podList) model.loadBalancing),
+                div [ style [("margin", "5px"), ("backgroundColor", "#473f54"), ("color", "white"), ("padding", "15px")] ]
+                    (SelfHealing.view SelfHealingMsg model.selfHealing)
             ]
     ]
 
