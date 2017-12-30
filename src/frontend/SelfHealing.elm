@@ -1,10 +1,16 @@
-module SelfHealing exposing (Model, Msg, init, update, view)
-import Html exposing (Html, h1, div, text)
+module SelfHealing exposing (Model, Msg, init, update, view, subscriptions)
+import Html exposing (Html, h1, div, text, button, table, tr, td, span)
+import Html.Attributes exposing (style)
+import Html.Events exposing (onClick)
+import Http
+import Json.Decode exposing (string)
+import Time
 
 -- MODEL
 
 type alias Model = {
-    x: Int
+    x: Int,
+    healthy: Bool
 }
 
 type alias Container c = {
@@ -15,17 +21,54 @@ type alias Container c = {
 -- MSG
 
 type Msg =
-    Unused
+      InfectService
+    | KillService
+    | ServiceInfected (Result Http.Error String)
+    | StatusPollTimer Time.Time
+    | StatusPollResponse  (Result Http.Error String)
 
 -- FUNCTIONS
 
-init = Model 0
+init = Model 0 True
 
-view : (Msg -> msg) -> Model -> List (Html msg)
-view makeMsg model =
-    [ div [] [ h1 [] [ text "Example 2: Self-Healing" ] ] ]
+renderPod : { name: String, app: String, status: String } -> Html msg
+renderPod pod =
+    tr [] [
+        td [] [ text pod.name ],
+        td [] [ text pod.status ]
+    ]
+
+view : (Msg -> msg) -> List { name: String, app: String, status: String } -> Model -> List (Html msg)
+view makeMsg pods model =
+    [ div [] [ 
+        h1 [] [ text "Example 2: Self-Healing" ],
+        button [ onClick (makeMsg InfectService) ] [ text "Infect service" ],
+        button [ onClick (makeMsg KillService) ] [ text "Kill service" ],
+        if (model.healthy) then (span [style [("color", "green")]][text "Service healthy"]) else (span [style [("color", "red")]][text "Service unhealthy"]),
+        table [] 
+            (List.map renderPod (List.filter (\n -> n.app == "healthcheck") pods))
+    ] ]
 
 update : (Msg -> msg) -> Msg -> Container c -> (Container c, Cmd msg)
 update makeMsg msg model =
-    (model, Cmd.none)
+    let
+        selfHealing = model.selfHealing
+    in
+        case msg of
+            InfectService ->
+                (model, Http.send (\m -> (makeMsg (ServiceInfected m))) (Http.post "http://192.168.178.80:83/healthcheck/infect" Http.emptyBody (string)))
+            KillService ->
+                (model, Cmd.none)
+            ServiceInfected _ ->
+                (model, Cmd.none)
+            StatusPollTimer _ ->
+                ({ model | selfHealing = { selfHealing | x = selfHealing.x + 1 }}, (Http.send (\m -> (makeMsg (StatusPollResponse m))) (Http.getString "http://192.168.178.80:83/healthcheck/")))
+            StatusPollResponse (Ok response) ->
+                ({ model | selfHealing = { selfHealing | healthy = True }}, Cmd.none)
+            StatusPollResponse (Err _)->
+                ({ model | selfHealing = { selfHealing | healthy = False }}, Cmd.none)
+
+subscriptions : (Msg -> msg) -> Container c -> Sub msg
+subscriptions makeMsg model =
+    Time.every (500 * Time.millisecond) (\t -> (makeMsg (StatusPollTimer t)))
 

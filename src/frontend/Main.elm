@@ -120,11 +120,14 @@ update msg model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    case model.podListResourceVersion of
-        "" ->
-            Sub.none
-        version ->
-            WebSocket.listen (format1 "ws://192.168.178.80:83/api/v1/namespaces/default/pods?resourceVersion={1}&watch=true" model.podListResourceVersion) PodUpdate
+    Sub.batch [
+        (case model.podListResourceVersion of
+            "" ->
+                Sub.none
+            version ->
+                WebSocket.listen (format1 "ws://192.168.178.80:83/api/v1/namespaces/default/pods?resourceVersion={1}&watch=true" model.podListResourceVersion) PodUpdate),
+        (SelfHealing.subscriptions SelfHealingMsg model)
+    ]
 
 -- VIEW
 
@@ -137,7 +140,7 @@ view model =
                 div [ style [("margin", "5px"), ("backgroundColor", "#962E2E"), ("color", "white"), ("padding", "15px")] ]
                     (LoadBalancing.view LoadBalancingMsg (List.map (\n -> { name = n.name, status = n.status, app = n.app, podIP = n.podIP }) model.podList) model.loadBalancing),
                 div [ style [("margin", "5px"), ("backgroundColor", "#473f54"), ("color", "white"), ("padding", "15px")] ]
-                    (SelfHealing.view SelfHealingMsg model.selfHealing)
+                    (SelfHealing.view SelfHealingMsg (List.map (\n -> { name = n.name, status = n.status, app = n.app }) model.podList) model.selfHealing)
             ]
     ]
 
