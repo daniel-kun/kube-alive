@@ -22,8 +22,8 @@ type alias Container c = {
 
 type Msg =
       InfectService
+    | ServiceInfectOrKillResponse (Result Http.Error String)
     | KillService
-    | ServiceInfected (Result Http.Error String)
     | StatusPollTimer Time.Time
     | StatusPollResponse  (Result Http.Error String)
 
@@ -41,7 +41,7 @@ renderPod pod =
 view : (Msg -> msg) -> List { name: String, app: String, status: String } -> Model -> List (Html msg)
 view makeMsg pods model =
     [ div [] [ 
-        h1 [] [ text "Example 2: Self-Healing" ],
+        h1 [] [ text "Experiment 2: Self-Healing" ],
         button [ onClick (makeMsg InfectService) ] [ text "Infect service" ],
         button [ onClick (makeMsg KillService) ] [ text "Kill service" ],
         if (model.healthy) then (span [style [("color", "green")]][text "Service healthy"]) else (span [style [("color", "red")]][text "Service unhealthy"]),
@@ -56,10 +56,10 @@ update makeMsg msg model =
     in
         case msg of
             InfectService ->
-                (model, Http.send (\m -> (makeMsg (ServiceInfected m))) (Http.post "http://192.168.178.80:83/healthcheck/infect" Http.emptyBody (string)))
+                (model, Http.send (\m -> (makeMsg (ServiceInfectOrKillResponse m))) (Http.post "http://192.168.178.80:83/healthcheck/infect" Http.emptyBody (string)))
             KillService ->
-                (model, Cmd.none)
-            ServiceInfected _ ->
+                (model, Http.send (\m -> (makeMsg (ServiceInfectOrKillResponse m))) (Http.post "http://192.168.178.80:83/healthcheck/kill" Http.emptyBody (string)))
+            ServiceInfectOrKillResponse _ ->
                 (model, Cmd.none)
             StatusPollTimer _ ->
                 ({ model | selfHealing = { selfHealing | x = selfHealing.x + 1 }}, (Http.send (\m -> (makeMsg (StatusPollResponse m))) (Http.getString "http://192.168.178.80:83/healthcheck/")))

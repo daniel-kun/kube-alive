@@ -37,7 +37,7 @@ renderLoadBalancing loadBalancing pod =
 view : (Msg -> m) -> List { name: String, status: String, app: String, podIP: String } -> Model -> List (Html m)
 view makeMsg podList loadBalancing =
     [
-        h1 [] [ text "Example 1: Load-Balancing" ],
+        h1 [] [ text "Experiment 1: Load-Balancing" ],
         button [ onClick (makeMsg ExecLoadBalanceTest) ] [text "Make 50 requests to getmac"],
         table [] (List.map (renderLoadBalancing loadBalancing) (List.filter (\n -> n.app == "getmac") podList))
     ]
