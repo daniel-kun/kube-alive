@@ -9,6 +9,7 @@ import KubernetesApiDecoder exposing (decodeKubernetesPodResult, decodeKubernete
 import Json.Decode exposing (decodeString)
 import LoadBalancing
 import SelfHealing
+import AutoScaling
 
 main =
   Html.program
@@ -35,11 +36,12 @@ type alias Model =
     , debugText : String
     , loadBalancing : LoadBalancing.Model
     , selfHealing : SelfHealing.Model
+    , autoScaling : AutoScaling.Model
   }
 
 init : (Model, Cmd Msg)
 init =
-  (Model Idle [] "" "(Loading)" LoadBalancing.init SelfHealing.init, Http.send PodList (Http.get "http://192.168.178.80:83/api/v1/namespaces/default/pods" decodeKubernetesPodResult))
+  (Model Idle [] "" "(Loading)" LoadBalancing.init SelfHealing.init AutoScaling.init, Http.send PodList (Http.get "http://192.168.178.80:83/api/v1/namespaces/default/pods" decodeKubernetesPodResult))
 
 -- UPDATE
 
@@ -49,6 +51,7 @@ type Msg =
     | PodUpdate String
     | LoadBalancingMsg LoadBalancing.Msg 
     | SelfHealingMsg SelfHealing.Msg
+    | AutoScalingMsg AutoScaling.Msg
 
 makePodInfoStatus : KubernetesPodItem -> String
 makePodInfoStatus item =
@@ -115,6 +118,8 @@ update msg model =
         LoadBalancing.update LoadBalancingMsg msg model
     SelfHealingMsg msg ->
         SelfHealing.update SelfHealingMsg msg model
+    AutoScalingMsg msg ->
+        AutoScaling.update AutoScalingMsg msg model
 
 -- SUBSCRIPTIONS
 
@@ -140,7 +145,9 @@ view model =
                 div [ style [("margin", "5px"), ("backgroundColor", "#962E2E"), ("color", "white"), ("padding", "15px")] ]
                     (LoadBalancing.view LoadBalancingMsg (List.map (\n -> { name = n.name, status = n.status, app = n.app, podIP = n.podIP }) model.podList) model.loadBalancing),
                 div [ style [("margin", "5px"), ("backgroundColor", "#473f54"), ("color", "white"), ("padding", "15px")] ]
-                    (SelfHealing.view SelfHealingMsg (List.map (\n -> { name = n.name, status = n.status, app = n.app }) model.podList) model.selfHealing)
+                    (SelfHealing.view SelfHealingMsg (List.map (\n -> { name = n.name, status = n.status, app = n.app }) model.podList) model.selfHealing),
+                div [ style [("margin", "5px"), ("backgroundColor", "#294f82"), ("color", "white"), ("padding", "15px")] ]
+                    (AutoScaling.view AutoScalingMsg  model.autoScaling)
             ]
     ]
 

@@ -34,7 +34,7 @@ renderLoadBalancing loadBalancing pod =
         td [] [text <| toString (List.Extra.count (\n -> n == pod.podIP) loadBalancing.responses), text <| " responses" ]
     ]
 
-view : (Msg -> m) -> List { name: String, status: String, app: String, podIP: String } -> Model -> List (Html m)
+view : (Msg -> msg) -> List { name: String, status: String, app: String, podIP: String } -> Model -> List (Html msg)
 view makeMsg podList loadBalancing =
     [
         h1 [] [ text "Experiment 1: Load-Balancing" ],
