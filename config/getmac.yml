@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: getmac
-        image: 192.168.178.80:5000/getmac:v2
+        image: 192.168.178.80:5000/getmac:v4
         ports:
         - containerPort: 8080
 ---
