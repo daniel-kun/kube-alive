@@ -1,34 +1,34 @@
 apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
 kind: Deployment
 metadata:
-  name: getmac-deployment
+  name: getip-deployment
   labels:
-    app: getmac
+    app: getip
 spec:
   replicas: 4
   selector:
     matchLabels:
-      app: getmac
+      app: getip
   template:
     metadata:
       labels:
-        app: getmac
+        app: getip
     spec:
       containers:
-      - name: getmac
-        image: 192.168.178.80:5000/getmac:v4
+      - name: getip
+        image: 192.168.178.80:5000/getip:v1
         ports:
         - containerPort: 8080
 ---
 kind: Service
 apiVersion: v1
 metadata:
-  name: getmac
+  name: getip
 spec:
   externalIPs:
   - 192.168.178.80
   selector:
-    app: getmac
+    app: getip
   ports:
   - protocol: TCP
     port: 80

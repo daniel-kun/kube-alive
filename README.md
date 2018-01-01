@@ -9,7 +9,7 @@ I used a Raspberry Pi cluster with five nodes and set them up as described by Sc
 Behaviours of k8s that can be observed "live":
 
 ## Load-Balancing
-When a ReplicaSet with multiple Pods exist, see how results are served from different Pods. Each Pod returns it's MAC address. (see src/getmac or http://\<ip-of-master\>:80)
+When a ReplicaSet with multiple Pods exist, see how results are served from different Pods. Each Pod returns it's MAC address. (see src/getip or http://\<ip-of-master\>:80)
 
 ## Self-Healing
 When an app crashes, see how the Pod is recreated using a health check. (see src/healthcheck or http://\<ip-of-master\>:81)

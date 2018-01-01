@@ -9,7 +9,7 @@ import "net/http"
 
 /**
 
-getmac starts an HTTP server on 8080 that returns nothing but this contain's IP address (the last one outputted by "ip a").
+getip starts an HTTP server on 8080 that returns nothing but this contain's IP address (the last one outputted by "ip a").
 
 For demo purposes only.
 
@@ -46,7 +46,7 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, getIP())
 	})
-	fmt.Printf("'getmac' server starting, listening to 8080 on all interfaces.\n")
+	fmt.Printf("'getip' server starting, listening to 8080 on all interfaces.\n")
 	http.ListenAndServe(":8080", nil)
 }
 
