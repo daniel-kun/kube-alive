@@ -80,6 +80,14 @@ updatePodInfo podUpdate podInfo =
     else
         podInfo
 
+addOrUpdatePod : List PodInfo -> KubernetesPodUpdate -> List PodInfo
+addOrUpdatePod podList podUpdate =
+    if (List.length (List.filter (\p -> p.uid == podUpdate.object.metadata.uid) podList) > 0) then
+        List.map (updatePodInfo podUpdate) podList
+    else
+        (makePodInfo podUpdate.object) :: podList
+        
+
 selectAllPodsExcept : KubernetesPodUpdate -> PodInfo -> Bool
 selectAllPodsExcept podUpdate podInfo =
     podUpdate.object.metadata.uid /= podInfo.uid
@@ -88,11 +96,11 @@ updatePodList : List PodInfo -> KubernetesPodUpdate -> List PodInfo
 updatePodList podList podUpdate =
     case podUpdate.updateType of
         "MODIFIED" ->
-            List.map (updatePodInfo podUpdate) podList
+            addOrUpdatePod podList podUpdate
         "DELETED" ->
             List.filter (selectAllPodsExcept podUpdate) podList
         "ADDED" ->
-            (makePodInfo podUpdate.object) :: podList
+            addOrUpdatePod podList podUpdate
         _ ->
             podList
 
@@ -138,16 +146,19 @@ subscriptions model =
 
 view : Model -> Html Msg
 view model =
-    div [] [
-        text model.debugText,
-        div [ style [("width", "100%")] ]
-            [
-                div [ style [("margin", "5px"), ("backgroundColor", "#962E2E"), ("color", "white"), ("padding", "15px")] ]
-                    (LoadBalancing.view LoadBalancingMsg (List.map (\n -> { name = n.name, status = n.status, app = n.app, podIP = n.podIP }) model.podList) model.loadBalancing),
-                div [ style [("margin", "5px"), ("backgroundColor", "#473f54"), ("color", "white"), ("padding", "15px")] ]
-                    (SelfHealing.view SelfHealingMsg (List.map (\n -> { name = n.name, status = n.status, app = n.app }) model.podList) model.selfHealing),
-                div [ style [("margin", "5px"), ("backgroundColor", "#294f82"), ("color", "white"), ("padding", "15px")] ]
-                    (AutoScaling.view AutoScalingMsg  model.autoScaling)
-            ]
-    ]
+    let
+        podList = (List.map (\n -> { name = n.name, status = n.status, app = n.app, podIP = n.podIP }) model.podList)
+    in 
+        div [] [
+            text model.debugText,
+            div [ style [("width", "100%")] ]
+                [
+                    div [ style [("margin", "5px"), ("backgroundColor", "#962E2E"), ("color", "white"), ("padding", "15px")] ]
+                        (LoadBalancing.view LoadBalancingMsg podList model.loadBalancing),
+                    div [ style [("margin", "5px"), ("backgroundColor", "#473f54"), ("color", "white"), ("padding", "15px")] ]
+                        (SelfHealing.view SelfHealingMsg podList model.selfHealing),
+                    div [ style [("margin", "5px"), ("backgroundColor", "#294f82"), ("color", "white"), ("padding", "15px")] ]
+                        (AutoScaling.view AutoScalingMsg  podList model.autoScaling)
+                ]
+        ]
 

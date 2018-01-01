@@ -31,14 +31,14 @@ type Msg =
 
 init = Model 0 True
 
-renderPod : { name: String, app: String, status: String } -> Html msg
+renderPod : { name: String, app: String, status: String, podIP: String } -> Html msg
 renderPod pod =
     tr [] [
         td [] [ text pod.name ],
         td [] [ text pod.status ]
     ]
 
-view : (Msg -> msg) -> List { name: String, app: String, status: String } -> Model -> List (Html msg)
+view : (Msg -> msg) -> List { name: String, app: String, status: String, podIP: String } -> Model -> List (Html msg)
 view makeMsg pods model =
     [ div [] [ 
         h1 [] [ text "Experiment 2: Self-Healing" ],
