@@ -41,7 +41,7 @@ type alias Model =
 
 init : (Model, Cmd Msg)
 init =
-  (Model Idle [] "" "(Loading)" LoadBalancing.init SelfHealing.init AutoScaling.init, Http.send PodList (Http.get "http://192.168.178.80:83/api/v1/namespaces/default/pods" decodeKubernetesPodResult))
+  (Model Idle [] "" "(Loading)" LoadBalancing.init SelfHealing.init AutoScaling.init, Http.send PodList (Http.get "/api/v1/namespaces/default/pods" decodeKubernetesPodResult))
 
 -- UPDATE
 
@@ -138,7 +138,7 @@ subscriptions model =
             "" ->
                 Sub.none
             version ->
-                WebSocket.listen (format1 "ws://192.168.178.80:83/api/v1/namespaces/default/pods?resourceVersion={1}&watch=true" model.podListResourceVersion) PodUpdate),
+                WebSocket.listen (format1 "ws://192.168.178.79/api/v1/namespaces/default/pods?resourceVersion={1}&watch=true" model.podListResourceVersion) PodUpdate),
         (SelfHealing.subscriptions SelfHealingMsg model)
     ]
 

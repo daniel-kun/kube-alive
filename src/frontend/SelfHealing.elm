@@ -56,13 +56,13 @@ update makeMsg msg model =
     in
         case msg of
             InfectService ->
-                (model, Http.send (\m -> (makeMsg (ServiceInfectOrKillResponse m))) (Http.post "http://192.168.178.80:83/healthcheck/infect" Http.emptyBody (string)))
+                (model, Http.send (\m -> (makeMsg (ServiceInfectOrKillResponse m))) (Http.post "/healthcheck/infect" Http.emptyBody (string)))
             KillService ->
-                (model, Http.send (\m -> (makeMsg (ServiceInfectOrKillResponse m))) (Http.post "http://192.168.178.80:83/healthcheck/kill" Http.emptyBody (string)))
+                (model, Http.send (\m -> (makeMsg (ServiceInfectOrKillResponse m))) (Http.post "/healthcheck/kill" Http.emptyBody (string)))
             ServiceInfectOrKillResponse _ ->
                 (model, Cmd.none)
             StatusPollTimer _ ->
-                ({ model | selfHealing = { selfHealing | x = selfHealing.x + 1 }}, (Http.send (\m -> (makeMsg (StatusPollResponse m))) (Http.getString "http://192.168.178.80:83/healthcheck/")))
+                ({ model | selfHealing = { selfHealing | x = selfHealing.x + 1 }}, (Http.send (\m -> (makeMsg (StatusPollResponse m))) (Http.getString "/healthcheck/")))
             StatusPollResponse (Ok response) ->
                 ({ model | selfHealing = { selfHealing | healthy = True }}, Cmd.none)
             StatusPollResponse (Err _)->

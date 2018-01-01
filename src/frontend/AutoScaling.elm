@@ -50,7 +50,7 @@ view makeMsg podList model =
     ]
 
 makeLoadGeneratorRequest makeMsg = 
-        Http.send (\n -> (makeMsg (ContinueLoadGenerator n))) (Http.getString "http://192.168.178.80:84/")
+        Http.send (\n -> (makeMsg (ContinueLoadGenerator n))) (Http.getString "/cpuhog")
 
 -- The load generator fires two requests at once, because a single request would only occupy two nodes
 makeLoadGeneratorRequests makeMsg = 

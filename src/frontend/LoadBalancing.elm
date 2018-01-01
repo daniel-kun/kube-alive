@@ -46,7 +46,7 @@ update : (Msg -> msg) -> Msg -> Container c -> (Container c, Cmd msg)
 update makeMsg msg model =
     case msg of
         ExecLoadBalanceTest ->
-            (model, Cmd.batch (List.repeat 50 (Http.send (\m -> makeMsg (ReceiveLoadBalanceResponse m)) (Http.getString "http://192.168.178.80:83/getip"))))
+            (model, Cmd.batch (List.repeat 50 (Http.send (\m -> makeMsg (ReceiveLoadBalanceResponse m)) (Http.getString "/getip"))))
         ReceiveLoadBalanceResponse (Ok response) ->
             let
                 loadBalancing = model.loadBalancing
