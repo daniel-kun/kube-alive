@@ -1,0 +1,57 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: cpuhog-deployment
+  labels:
+    app: cpuhog
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cpuhog
+  template:
+    metadata:
+      labels:
+        app: cpuhog
+    spec:
+      containers:
+      - name: cpuhog
+        image: 192.168.178.80:5000/cpuhog:v1
+        resources:
+          requests:
+            cpu: "1"
+        ports:
+        - containerPort: 8080
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: cpuhog
+spec:
+  externalIPs:
+  - 192.168.178.80
+  selector:
+    app: cpuhog
+  ports:
+  - protocol: TCP
+    port: 84
+    targetPort: 8080
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: cpuhog-hpa
+  labels:
+    app: cpuhog
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1beta1
+    kind: Deployment
+    name: cpuhog-deployment
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: Resource
+    resource:
+      name: cpu
+      targetAverageUtilization: 50
