@@ -27,6 +27,8 @@ When an app crashes or becomes unhealthy (via health-check), see how the Pod is 
 When traffic can not be served with a single Pod and CPU usage exceeds 50%, more Pods are created automatically and more requests are served.
 (see src/cpuhog or http://\<ip-of-master\>:84)
 
+![Experiment 3 Demo](docs/demo-experiment-2.gif)
+
 ## Deployment
 When a deployment is updated, you see that new Pods are created and then old Pods are killed. (coming soon)
 
