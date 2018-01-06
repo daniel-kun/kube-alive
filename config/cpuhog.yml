@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: cpuhog
-        image: 192.168.178.80:5000/cpuhog:v1
+        image: 192.168.178.79:5000/cpuhog:v1
         resources:
           requests:
             cpu: "1"
@@ -28,13 +28,11 @@ apiVersion: v1
 metadata:
   name: cpuhog
 spec:
-  externalIPs:
-  - 192.168.178.80
   selector:
     app: cpuhog
   ports:
   - protocol: TCP
-    port: 84
+    port: 80
     targetPort: 8080
 ---
 apiVersion: autoscaling/v2beta1

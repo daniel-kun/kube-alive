@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: healthcheck
-        image: 192.168.178.80:5000/healthcheck:v3
+        image: 192.168.178.79:5000/healthcheck:v3
         livenessProbe:
           httpGet:
             path: /
@@ -32,12 +32,10 @@ apiVersion: v1
 metadata:
   name: healthcheck
 spec:
-  externalIPs:
-  - 192.168.178.80
   selector:
     app: healthcheck
   ports:
   - protocol: TCP
-    port: 81
+    port: 80
     targetPort: 8080
 
