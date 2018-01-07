@@ -1,7 +1,7 @@
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import String.Format exposing (format1)
+import String.Format exposing (format2)
 import WebSocket
 import Http exposing (get, send)
 import KubernetesApiModel exposing (KubernetesResultMetadata, KubernetesPodResult, KubernetesPodItem, KubernetesPodMetadata, KubernetesLabels, KubernetesPodStatus, KubernetesPodCondition, KubernetesPodUpdate)
@@ -12,7 +12,7 @@ import SelfHealing
 import AutoScaling
 
 main =
-  Html.program
+  Html.programWithFlags
     { init = init
     , view = view
     , update = update
@@ -30,8 +30,8 @@ type alias PodInfo =
     }
 
 type alias Model =
-  {   lastMsg : Msg
-    , podList : List PodInfo
+  {   podList : List PodInfo
+    , originHost: String
     , podListResourceVersion : String
     , debugText : String
     , loadBalancing : LoadBalancing.Model
@@ -39,15 +39,18 @@ type alias Model =
     , autoScaling : AutoScaling.Model
   }
 
-init : (Model, Cmd Msg)
-init =
-  (Model Idle [] "" "(Loading)" LoadBalancing.init SelfHealing.init AutoScaling.init, Http.send PodList (Http.get "/api/v1/namespaces/default/pods" decodeKubernetesPodResult))
+type alias Flags =
+  { originHost : String
+  }
+
+init : Flags -> (Model, Cmd Msg)
+init flags =
+  (Model [] flags.originHost "" "(Loading)" LoadBalancing.init SelfHealing.init AutoScaling.init, Http.send PodList (Http.get "/api/v1/namespaces/default/pods" decodeKubernetesPodResult))
 
 -- UPDATE
 
 type Msg = 
-      Idle
-    | PodList (Result Http.Error KubernetesPodResult) 
+      PodList (Result Http.Error KubernetesPodResult) 
     | PodUpdate String
     | LoadBalancingMsg LoadBalancing.Msg 
     | SelfHealingMsg SelfHealing.Msg
@@ -107,8 +110,6 @@ updatePodList podList podUpdate =
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
   case msg of
-    Idle ->
-        (model, Cmd.none)
     PodList (Ok newPodList) ->
         ({ model | debugText = "Loaded.", podList = makePodList newPodList, podListResourceVersion = newPodList.metadata.resourceVersion }, Cmd.none)
     PodList (Err _) ->
@@ -138,7 +139,7 @@ subscriptions model =
             "" ->
                 Sub.none
             version ->
-                WebSocket.listen (format1 "ws://192.168.178.79/api/v1/namespaces/default/pods?resourceVersion={1}&watch=true" model.podListResourceVersion) PodUpdate),
+                WebSocket.listen (format2 "ws://{1}/api/v1/namespaces/default/pods?resourceVersion={2}&watch=true" (model.originHost, model.podListResourceVersion)) PodUpdate),
         (SelfHealing.subscriptions SelfHealingMsg model)
     ]
 
@@ -151,6 +152,7 @@ view model =
     in 
         div [] [
             text model.debugText,
+            text model.originHost,
             div [ style [("width", "100%")] ]
                 [
                     div [ style [("margin", "5px"), ("backgroundColor", "#962E2E"), ("color", "white"), ("padding", "15px")] ]
