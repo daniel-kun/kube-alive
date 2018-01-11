@@ -1,4 +1,4 @@
-FROM golang
+FROM resin/raspberrypi3-golang
 COPY main.go /go/src/getip/main.go
 RUN go install getip
 ENTRYPOINT /go/bin/getip
