@@ -1,3 +1,5 @@
+![Raspberry Pi cluster](docs/kube-pi.png)
+
 # Kubernetes: It's alive!
 
 You can find a dashboard with experiment with Kubernetes (k8s) to observe it's behaviour in real scenarios in this project.
