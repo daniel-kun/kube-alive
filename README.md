@@ -6,9 +6,7 @@ You can find a dashboard with experiment with Kubernetes (k8s) to observe it's b
 You should have a k8s cluster up and running on ARM to deploy the tools from this repository.
 I used a Raspberry Pi cluster with five nodes and set them up as described by Scott Hanselman here: https://www.hanselman.com/blog/HowToBuildAKubernetesClusterWithARMRaspberryPiThenRunNETCoreOnOpenFaas.aspx
 
-*Disclaimer: Some configs I made in this rep are highly UNSECURE, e.g. I expose the https, authenticated API call to kubernetes as non-secure HTTP without authentication via nginx.
-This also is early work in progress, the configs include hard-coded IP addresses of the master node and the required local Docker registry must be set up manually.
-In a few weeks, I should be able to provide ready-to-use k8s config files and containers on docker hub so you can install this in a single command and see k8s behaviour in real-time.*
+*Disclaimer: Some configs I made in this rep are highly UNSECURE, e.g. I expose the https, authenticated API call to kubernetes as non-secure HTTP without authentication via nginx. I haven't tested deployment and behaviour on other clusters than the Raspberry Pis from the image above and a minikube on my laptop. The brave can check out this repo and execute ./deploy.sh, though.*
 
 Behaviours of k8s that can be observed "live":
 
