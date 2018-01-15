@@ -1,4 +1,4 @@
-![Raspberry Pi cluster](docs/kube-pi.png)
+<img src="https://raw.githubusercontent.com/daniel-kun/kube-alive/master/docs/kube-pi.png" width="420" alt="Image of a Raspberry Pi cluster">
 
 # Kubernetes: It's alive!
 
