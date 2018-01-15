@@ -29,7 +29,7 @@ spec:
   selector:
     app: frontend
   externalIPs:
-  - 192.168.99.100
+  - %%KUBEALIVE_PUBLICIP%%
   ports:
   - protocol: TCP
     port: 80
