@@ -1,4 +1,4 @@
-apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
   name: frontend-deployment
@@ -17,7 +17,7 @@ spec:
       containers:
       - name: frontend
         imagePullPolicy: Always
-        image: 192.168.178.79:5000/frontend:latest
+        image: danielkun/frontend_amd64
         ports:
         - containerPort: 80
 ---
@@ -29,7 +29,7 @@ spec:
   selector:
     app: frontend
   externalIPs:
-  - 192.168.178.79
+  - 192.168.99.100
   ports:
   - protocol: TCP
     port: 80

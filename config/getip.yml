@@ -1,4 +1,4 @@
-apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
   name: getip-deployment
@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: getip
-        image: 192.168.178.79:5000/getip:v1
+        image: danielkun/getip_amd64
         ports:
         - containerPort: 8080
 ---

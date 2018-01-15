@@ -1,4 +1,5 @@
-apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+#apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
   name: cpuhog-deployment
@@ -16,7 +17,7 @@ spec:
     spec:
       containers:
       - name: cpuhog
-        image: 192.168.178.79:5000/cpuhog:v1
+        image: danielkun/cpuhog_amd64
         resources:
           requests:
             cpu: "1"

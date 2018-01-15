@@ -1,4 +1,4 @@
-apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
   name: healthcheck-deployment
@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: healthcheck
-        image: 192.168.178.79:5000/healthcheck:v3
+        image: danielkun/healthcheck_amd64
         livenessProbe:
           httpGet:
             path: /
