@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: healthcheck
-        image: danielkun/healthcheck_amd64
+        image: danielkun/healthcheck
         livenessProbe:
           httpGet:
             path: /

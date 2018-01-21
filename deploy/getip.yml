@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: getip
-        image: danielkun/getip_amd64
+        image: danielkun/getip
         ports:
         - containerPort: 8080
 ---

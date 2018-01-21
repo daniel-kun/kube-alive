@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: cpuhog
-        image: danielkun/cpuhog_amd64
+        image: danielkun/cpuhog
         resources:
           requests:
             cpu: "1"

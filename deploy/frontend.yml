@@ -17,7 +17,7 @@ spec:
       containers:
       - name: frontend
         imagePullPolicy: Always
-        image: danielkun/frontend_amd64
+        image: danielkun/frontend
         ports:
         - containerPort: 80
 ---
