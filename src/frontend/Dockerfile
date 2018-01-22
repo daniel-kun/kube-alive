@@ -1,4 +1,5 @@
-FROM nginx
+ARG ARCH
+FROM ${ARCH}/nginx
 
 COPY nginx.conf /etc/nginx/
 COPY index.html /www/data/

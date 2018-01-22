@@ -1,4 +1,5 @@
-FROM golang
+ARG ARCH
+FROM ${ARCH}/golang:stretch
 COPY main.go /go/src/getip/main.go
 RUN go install getip
 ENTRYPOINT /go/bin/getip

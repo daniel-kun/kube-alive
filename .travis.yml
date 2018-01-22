@@ -6,11 +6,16 @@ services:
   - docker
 
 before_install:
-  - docker pull resin/raspberrypi3-golang
+  - docker pull amd64/golang:stretch
+  - docker pull arm32v7/golang:stretch
+  - docker pull amd64/nginx
+  - docker pull arm32v7/nginx
   - docker run --rm --privileged multiarch/qemu-user-static:register --reset
+  - wget https://github.com/estesp/manifest-tool/releases/download/v0.7.0/manifest-tool-linux-amd64 && chmod +x manifest-tool-linux-amd64
 
 script:
-  - sh build.sh
+  - sh build.sh amd64
+  - sh build.sh arm32v7
 
 after_success:
-  - sh deploy.sh
+  - sh push.sh
