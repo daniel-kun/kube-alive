@@ -1,5 +1,5 @@
-ARG ARCH
-FROM ${ARCH}/nginx
+ARG BASEIMG
+FROM ${BASEIMG}
 
 COPY nginx.conf /etc/nginx/
 COPY index.html /www/data/

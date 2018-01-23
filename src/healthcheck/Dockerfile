@@ -1,5 +1,5 @@
-ARG ARCH
-FROM ${ARCH}/golang
+ARG BASEIMG
+FROM ${BASEIMG}
 COPY main.go /go/src/healthcheck/main.go
 RUN go install healthcheck
 ENTRYPOINT /go/bin/healthcheck

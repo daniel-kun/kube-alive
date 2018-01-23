@@ -1,5 +1,5 @@
-ARG ARCH
-FROM ${ARCH}/golang
+ARG BASEIMG
+FROM ${BASEIMG}
 COPY main.go /go/src/cpuhog/main.go
 RUN go install cpuhog
 ENTRYPOINT /go/bin/cpuhog
