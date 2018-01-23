@@ -17,7 +17,7 @@ if [ -z "${ARCH}" ]; then
 fi
 
 # Set appropriate BASEIMG depending on $ARCH:
-case $RARCH in
+case $ARCH in
     arm32v7)
             # We need these base images, because they contain qemu-armhf-satic
             GOLANG_BASEIMG=resin/raspberrypi3-golang 
@@ -37,12 +37,12 @@ echo "Building docker images for architecture ${ARCH}."
 
 # Now build the docker containers:
 echo "Building getip..."
-docker build -t "${DOCKER_USERNAME}/getip_${ARCH}" src/getip --build-arg "BASEIMG=${GOLANG_BASEIMG}"
-echo "Building healthcheck..."
-docker build -t "${DOCKER_USERNAME}/healthcheck_${ARCH}" src/healthcheck --build-arg "BASEIMG=${GOLANG_BASEIMG}"
-echo "Building cpuhog..."
-docker build -t "${DOCKER_USERNAME}/cpuhog_${ARCH}" src/cpuhog --build-arg "BASEIMG=${GOLANG_BASEIMG}"
-echo "Building frontend..."
-ocker build -t "${DOCKER_USERNAME}/frontend_${ARCH}" src/frontend --build-arg "BASEIMG=${NGINX_BASEIMG}"
-echo "Build finished."
+docker build -t "${DOCKER_USERNAME}/getip_${ARCH}" src/getip --build-arg "BASEIMG=${GOLANG_BASEIMG}" && \
+echo "Building healthcheck..." && \
+docker build -t "${DOCKER_USERNAME}/healthcheck_${ARCH}" src/healthcheck --build-arg "BASEIMG=${GOLANG_BASEIMG}" && \
+echo "Building cpuhog..." && \
+docker build -t "${DOCKER_USERNAME}/cpuhog_${ARCH}" src/cpuhog --build-arg "BASEIMG=${GOLANG_BASEIMG}" && \
+echo "Building frontend..." && \
+docker build -t "${DOCKER_USERNAME}/frontend_${ARCH}" src/frontend --build-arg "BASEIMG=${NGINX_BASEIMG}" && \
+echo "Build finished." && exit 0  || echo "Build failed" && exit 1
 

@@ -6,10 +6,10 @@ services:
   - docker
 
 before_install:
-  - docker pull amd64/golang:stretch
-  - docker pull arm32v7/golang:stretch
-  - docker pull amd64/nginx
-  - docker pull arm32v7/nginx
+  - docker pull resin/raspberrypi3-golang 
+  - docker pull alexellis2/nginx-arm
+  - docker pull golang
+  - docker pull nginx
   - docker run --rm --privileged multiarch/qemu-user-static:register --reset
   - wget -O manifest-tool https://github.com/estesp/manifest-tool/releases/download/v0.7.0/manifest-tool-linux-amd64 && chmod +x manifest-tool && sudo mv manifest-tool /usr/bin
 
