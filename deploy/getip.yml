@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: getip
-        image: danielkun/getip
+        image: kubealive/getip
         ports:
         - containerPort: 8080
 ---

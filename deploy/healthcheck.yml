@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: healthcheck
-        image: danielkun/healthcheck
+        image: kubealive/healthcheck
         livenessProbe:
           httpGet:
             path: /
