@@ -25,4 +25,8 @@ ifndef DOCKER_PASSWORD
 endif
 	build/push.sh
 
-.PHONY: build build-cross push
+deploy:
+	./deploy.sh local
+
+.PHONY: build build-cross push deploy
+
