@@ -1,8 +1,8 @@
 #!/bin/sh
 
 # Check for mandatory parameters: 
-if [ ! -n "${DOCKER_USERNAME}" ]; then
-    echo "Env var DOCKER_USERNAME must be set.";
+if [ ! -n "${DOCKER_REPO}" ]; then
+    echo "Env var DOCKER_REPO must be set.";
     exit 1
 fi
 
@@ -37,12 +37,14 @@ echo "Building docker images for architecture ${ARCH}."
 
 # Now build the docker containers:
 echo "Building getip..."
-docker build -t "${DOCKER_USERNAME}/getip_${ARCH}" src/getip --build-arg "BASEIMG=${GOLANG_BASEIMG}" && \
+docker build -t "${DOCKER_REPO}/getip_${ARCH}" src/getip --build-arg "BASEIMG=${GOLANG_BASEIMG}" && \
 echo "Building healthcheck..." && \
-docker build -t "${DOCKER_USERNAME}/healthcheck_${ARCH}" src/healthcheck --build-arg "BASEIMG=${GOLANG_BASEIMG}" && \
+docker build -t "${DOCKER_REPO}/healthcheck_${ARCH}" src/healthcheck --build-arg "BASEIMG=${GOLANG_BASEIMG}" && \
 echo "Building cpuhog..." && \
-docker build -t "${DOCKER_USERNAME}/cpuhog_${ARCH}" src/cpuhog --build-arg "BASEIMG=${GOLANG_BASEIMG}" && \
+docker build -t "${DOCKER_REPO}/cpuhog_${ARCH}" src/cpuhog --build-arg "BASEIMG=${GOLANG_BASEIMG}" && \
 echo "Building frontend..." && \
-docker build -t "${DOCKER_USERNAME}/frontend_${ARCH}" src/frontend --build-arg "BASEIMG=${NGINX_BASEIMG}" && \
-echo "Build finished." && exit 0  || echo "Build failed" && exit 1
+docker build -t "${DOCKER_REPO}/frontend_${ARCH}" src/frontend --build-arg "BASEIMG=${NGINX_BASEIMG}" && \
+echo "
+Build for CPU ${ARCH} finished.
+You can now 'make push' to push the built containers to your registry. (You have to set DOCKER_REPO and DOCKER_PASSWORD first.)" && exit 0  || echo "Build failed" && exit 1
 

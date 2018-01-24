@@ -14,8 +14,7 @@ before_install:
   - wget -O manifest-tool https://github.com/estesp/manifest-tool/releases/download/v0.7.0/manifest-tool-linux-amd64 && chmod +x manifest-tool && sudo mv manifest-tool /usr/bin
 
 script:
-  - sh build.sh amd64
-  - sh build.sh arm32v7
+  - sh make cross-build
 
 after_success:
-  - sh push.sh
+  - sh make push.sh
