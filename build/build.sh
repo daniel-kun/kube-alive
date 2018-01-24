@@ -46,5 +46,5 @@ echo "Building frontend..." && \
 docker build -t "${DOCKER_REPO}/frontend_${ARCH}" src/frontend --build-arg "BASEIMG=${NGINX_BASEIMG}" && \
 echo "
 Build for CPU ${ARCH} finished.
-You can now 'make push' to push the built containers to your registry. (You have to set DOCKER_REPO and DOCKER_PASSWORD first.)" && exit 0  || echo "Build failed" && exit 1
+You can now 'make push' to push the built containers to your registry. (You have to set DOCKER_REPO, DOCKER_USERNAME and DOCKER_PASSWORD first.)" && exit 0  || echo "Build failed" && exit 1
 

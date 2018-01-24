@@ -1,0 +1,13 @@
+image: %%DOCKER_REPO%%/healthcheck:latest
+manifests:
+  -
+    image: %%DOCKER_REPO%%/healthcheck_arm32v7
+    platform:
+      architecture: arm
+      os: linux
+  -
+    image: %%DOCKER_REPO%%/healthcheck_amd64
+    platform:
+      architecture: amd64
+      os: linux
+

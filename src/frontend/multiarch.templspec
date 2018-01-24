@@ -1,12 +1,12 @@
-image: danielkun/cpuhog:latest
+image: %%DOCKER_REPO%%/frontend:latest
 manifests:
   -
-    image: danielkun/cpuhog_arm32v7
+    image: %%DOCKER_REPO%%/frontend_arm32v7
     platform:
       architecture: arm
       os: linux
   -
-    image: danielkun/cpuhog_amd64
+    image: %%DOCKER_REPO%%/frontend_amd64
     platform:
       architecture: amd64
       os: linux

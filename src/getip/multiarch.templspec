@@ -1,12 +1,12 @@
-image: danielkun/healthcheck:latest
+image: %%DOCKER_REPO%%/getip:latest
 manifests:
   -
-    image: danielkun/healthcheck_arm32v7
+    image: %%DOCKER_REPO%%/getip_arm32v7
     platform:
       architecture: arm
       os: linux
   -
-    image: danielkun/healthcheck_amd64
+    image: %%DOCKER_REPO%%/getip_amd64
     platform:
       architecture: amd64
       os: linux
