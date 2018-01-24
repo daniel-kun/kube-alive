@@ -16,6 +16,11 @@ endif
 push:
 ifndef DOCKER_REPO
 	$(error DOCKER_REPO is not defined)
+endif
+ifndef DOCKER_USERNAME
+	$(error DOCKER_USERNAME is not defined)
+endif
+ifndef DOCKER_PASSWORD
 	$(error DOCKER_PASSWORD is not defined)
 endif
 	build/push.sh

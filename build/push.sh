@@ -1,9 +1,9 @@
 #!/bin/sh
-if [ ! -n "${DOCKER_REPO}" ] || [ ! -n "${DOCKER_PASSWORD}" ]; then
-  echo "Env vars DOCKER_REPO and DOCKER_PASSWORD must be set.";
+if [ ! -n "${DOCKER_REPO}" ] || [ ! -n "${DOCKER_USERNAME}" ] || [ ! -n "${DOCKER_PASSWORD}" ]; then
+  echo "Env vars DOCKER_REPO, DOCKER_USERNAME and DOCKER_PASSWORD must be set.";
   exit 1
 fi
-docker login -u "${DOCKER_REPO}" -p "${DOCKER_PASSWORD}"
+docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}"
 
 # Service 'getip'
 docker images | grep -e "^${DOCKER_REPO}/getip_arm32v7" >/dev/zero && docker push "${DOCKER_REPO}/getip_arm32v7"
