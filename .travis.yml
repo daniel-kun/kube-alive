@@ -17,4 +17,4 @@ script:
   - make cross-build
 
 after_success:
-  - make push.sh
+  - make push
