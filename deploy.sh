@@ -28,16 +28,13 @@ frontend"`; do
 done
 
 echo "
-
-    INFO:
-    In case you don't see any pods listed in the colored boxes, it might be because your
-    service account does not have enough privileges to list the pods. You can use this
-    extreme mnd highly unsecure method to grant the default service account access to everything:
-
-    kubectl create clusterrolebinding add-on-cluster-admin-default --clusterrole=cluster-admin  --serviceaccount=default:default
-
-    After executing this, you should be able to reload the browser and see the pods.)
-
 FINISHED!
-You should now be able to access kube-alive at http://${KUBEALIVE_PUBLICIP}/.
+
+You should now be able to access kube-alive at 
+
+    http://${KUBEALIVE_PUBLICIP}/
+
+Also, you can look at all those neat Kubernetes resources that havee been created via
+
+    kubectl get all -n kube-alive
 ";
