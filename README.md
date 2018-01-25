@@ -8,7 +8,7 @@ I used a Raspberry Pi cluster with five nodes and set them up as described by Sc
 
 ## Deployment
 
-*Prerequisites:* You need to have `kubectl` installed and configured to point at a running cluster that you have admin access to. Supported CPU architectures are amd64 and arm32v7. It's tested on Kubernetes 1.9.1 on ubuntu on amd64 and raspbian on Raspberry Pis.
+*Prerequisites:* You need to have `kubectl` installed and configured to point at a running cluster that you have admin access to. Supported CPU architectures are amd64 and arm32v7. It's tested on Kubernetes 1.9.1 on ubuntu on amd64 and raspbian on Raspberry Pis. You can even get this running on Windows by using minikube and [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) with Ubuntu.
 
 You can deploy kube-alive to your local cluster with this single command:
 
