@@ -4,7 +4,7 @@ if [ -z "`kubectl version`" ]; then
     exit 1;
 fi
 
-export KUBEALIVE_PUBLICIP=`kubectl config view | grep server | sed 's/.*http[s]:\/\/\(.*\):.*/\1/'`
+export KUBEALIVE_PUBLICIP=`kubectl config view --minify=true | grep server | sed 's/.*http[s]:\/\/\(.*\):.*/\1/'`
 echo "Using ${KUBEALIVE_PUBLICIP} as the exposed IP to access kube-alive."
 
 LOCAL=0
