@@ -1,6 +1,7 @@
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
+  namespace: kube-alive
   name: getip-deployment
   labels:
     app: getip
@@ -11,6 +12,7 @@ spec:
       app: getip
   template:
     metadata:
+      namespace: kube-alive
       labels:
         app: getip
     spec:
@@ -23,6 +25,7 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
+  namespace: kube-alive
   name: getip
 spec:
   selector:

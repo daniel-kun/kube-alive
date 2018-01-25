@@ -1,6 +1,7 @@
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
+  namespace: kube-alive
   name: cpuhog-deployment
   labels:
     app: cpuhog
@@ -26,6 +27,7 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
+  namespace: kube-alive
   name: cpuhog
 spec:
   selector:
@@ -38,6 +40,7 @@ spec:
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
+  namespace: kube-alive
   name: cpuhog-hpa
   labels:
     app: cpuhog

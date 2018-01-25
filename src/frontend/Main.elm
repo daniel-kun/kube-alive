@@ -45,7 +45,7 @@ type alias Flags =
 
 init : Flags -> (Model, Cmd Msg)
 init flags =
-  (Model [] flags.originHost "" "(Loading)" LoadBalancing.init SelfHealing.init AutoScaling.init, Http.send PodList (Http.get "/api/v1/namespaces/default/pods" decodeKubernetesPodResult))
+  (Model [] flags.originHost "" "(Loading)" LoadBalancing.init SelfHealing.init AutoScaling.init, Http.send PodList (Http.get "/api/v1/namespaces/kube-alive/pods" decodeKubernetesPodResult))
 
 -- UPDATE
 
@@ -139,7 +139,7 @@ subscriptions model =
             "" ->
                 Sub.none
             version ->
-                WebSocket.listen (format2 "ws://{1}/api/v1/namespaces/default/pods?resourceVersion={2}&watch=true" (model.originHost, model.podListResourceVersion)) PodUpdate),
+                WebSocket.listen (format2 "ws://{1}/api/v1/namespaces/kube-alive/pods?resourceVersion={2}&watch=true" (model.originHost, model.podListResourceVersion)) PodUpdate),
         (SelfHealing.subscriptions SelfHealingMsg model)
     ]
 

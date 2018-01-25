@@ -12298,7 +12298,7 @@ var _user$project$Main$subscriptions = function (model) {
 						_elm_lang$websocket$WebSocket$listen,
 						A2(
 							_nathanfox$elm_string_format$String_Format$format2,
-							'ws://{1}/api/v1/namespaces/default/pods?resourceVersion={2}&watch=true',
+							'ws://{1}/api/v1/namespaces/kube-alive/pods?resourceVersion={2}&watch=true',
 							{ctor: '_Tuple2', _0: model.originHost, _1: model.podListResourceVersion}),
 						_user$project$Main$PodUpdate);
 				}
@@ -12328,7 +12328,7 @@ var _user$project$Main$init = function (flags) {
 		_1: A2(
 			_elm_lang$http$Http$send,
 			_user$project$Main$PodList,
-			A2(_elm_lang$http$Http$get, '/api/v1/namespaces/default/pods', _user$project$KubernetesApiDecoder$decodeKubernetesPodResult))
+			A2(_elm_lang$http$Http$get, '/api/v1/namespaces/kube-alive/pods', _user$project$KubernetesApiDecoder$decodeKubernetesPodResult))
 	};
 };
 var _user$project$Main$main = _elm_lang$html$Html$programWithFlags(

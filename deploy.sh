@@ -15,7 +15,8 @@ else
     echo "Deploying from github."
 fi
 
-for service in `echo "getip
+for service in `echo "namespace
+getip
 healthcheck
 cpuhog
 frontend"`; do

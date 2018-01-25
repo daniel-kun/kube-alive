@@ -1,6 +1,7 @@
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
+  namespace: kube-alive
   name: healthcheck-deployment
   labels:
     app: healthcheck
@@ -11,6 +12,7 @@ spec:
       app: healthcheck
   template:
     metadata:
+      namespace: kube-alive
       labels:
         app: healthcheck
     spec:
@@ -30,6 +32,7 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
+  namespace: kube-alive
   name: healthcheck
 spec:
   selector:

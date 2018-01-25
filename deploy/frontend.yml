@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  namespace: default
+  namespace: kube-alive
   name: pod-read
 rules:
 - apiGroups: [""]
@@ -11,23 +11,23 @@ rules:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  namespace: default
+  namespace: kube-alive
   name: frontend-service-account
 automountServiceAccountToken: true
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  namespace: default
+  namespace: kube-alive
   name: frontend-can-read-pods
 subjects:
 - kind: User
   name: frontend-service-account
-  namespace: default
+  namespace: kube-alive
   apiGroup: rbac.authorization.k8s.io
 - kind: ServiceAccount
+  namespace: kube-alive
   name: frontend-service-account
-  namespace: default
 roleRef:
   kind: Role
   name: pod-read
@@ -37,6 +37,7 @@ apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
   name: frontend-deployment
+  namespace: kube-alive
   labels:
     app: frontend
 spec:
@@ -60,6 +61,7 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
+  namespace: kube-alive
   name: frontend
 spec:
   selector:
