@@ -21,11 +21,11 @@ case $ARCH in
     arm32v7)
             # We need these base images, because they contain qemu-armhf-satic
             GOLANG_BASEIMG=resin/raspberrypi3-golang 
-            NGINX_BASEIMG=alexellis2/nginx-arm
+            NGINX_BASEIMG=danielkun/nginx-elm-raspbian-arm32v7
         ;;
     amd64)
             GOLANG_BASEIMG=golang
-            NGINX_BASEIMG=nginx
+            NGINX_BASEIMG=danielkun/nginx-elm-debian-x86_64
         ;;
     *)
         echo "Unsupported ARCH ${ARCH}"
