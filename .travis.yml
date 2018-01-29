@@ -7,9 +7,9 @@ services:
 
 before_install:
   - docker pull resin/raspberrypi3-golang 
-  - docker pull alexellis2/nginx-arm
+  - docker pull danielkun/nginx-elm-raspbian-arm32v7
   - docker pull golang
-  - docker pull nginx
+  - docker pull danielkun/nginx-elm-debian-x86_64
   - docker run --rm --privileged multiarch/qemu-user-static:register --reset
   - wget -O manifest-tool https://github.com/estesp/manifest-tool/releases/download/v0.7.0/manifest-tool-linux-amd64 && chmod +x manifest-tool && sudo mv manifest-tool /usr/bin
 
