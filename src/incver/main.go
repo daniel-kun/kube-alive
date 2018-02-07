@@ -4,7 +4,6 @@ import (
     "os/exec";
     "bufio";
     "fmt";
-    "time";
     )
 
 func readInBackground (reader *bufio.Reader, channel chan string) {
@@ -18,11 +17,6 @@ func readInBackground (reader *bufio.Reader, channel chan string) {
     close(channel)
 }
 
-type StreamCommandOptions struct {
-    outFormat string
-    errFormat string
-}
-
 type ReceiverNotification struct {
     finished bool
     payload string
@@ -33,17 +27,7 @@ type RegisterNotification struct {
     unregisterChan chan ReceiverNotification
 }
 
-func removeFromSlice(input []chan ReceiverNotification, chanToBeRemoved chan ReceiverNotification) []chan ReceiverNotification {
-    var result []chan ReceiverNotification
-    for _, c := range input {
-        if c != chanToBeRemoved {
-            result = append(result, c)
-        }
-    }
-    return result
-}
-
-func streamCommand(options StreamCommandOptions, name string, arg ...string) chan RegisterNotification {
+func streamCommand(name string, arg ...string) chan RegisterNotification {
     registerChan := make(chan RegisterNotification, 1)
     var receiverChans []chan ReceiverNotification;
     go func() {
@@ -94,21 +78,19 @@ func streamCommand(options StreamCommandOptions, name string, arg ...string) cha
         }
         receiverChans = []chan ReceiverNotification{}
         close(registerChan)
-        fmt.Printf("Waiting for cmd\n")
         cmd.Wait()
         fmt.Printf("cmd finished\n")
     } ()
     return registerChan
 }
 
-func readOutput(prefix string, registerChan chan RegisterNotification) {
+func receiveOutput(prefix string, registerChan chan RegisterNotification) {
     receiveChan := make(chan ReceiverNotification, 1)
     registerChan <- RegisterNotification{receiveChan,nil}
     for {
         notif, ok := <-receiveChan
         if ok {
             if notif.finished {
-                fmt.Printf("Closing %s\n", prefix)
                 close(receiveChan)
                 break
             } else {
@@ -118,24 +100,53 @@ func readOutput(prefix string, registerChan chan RegisterNotification) {
             break
         }
     }
-    fmt.Printf("Done with %s\n", prefix)
+    fmt.Printf("%s closed\n", prefix)
+}
+
+func wrapWithFinishChannel(fnc func(string, chan RegisterNotification), prefix string, registerChan chan RegisterNotification) chan bool {
+    result := make(chan bool, 1)
+    go func() {
+        fnc(prefix, registerChan)
+        result <- true
+    } ()
+    return result;
 }
 
 func main() {
-    registerChan := streamCommand(StreamCommandOptions{}, "sh", "-c", "./test.sh")
-    finishChan := make(chan ReceiverNotification, 1)
-    registerChan <- RegisterNotification {finishChan, nil}
-    go readOutput("A", registerChan)
-    go readOutput("B", registerChan)
-    go readOutput("C", registerChan)
-    duration, _ := time.ParseDuration("2s")
-    time.Sleep(duration)
-    for {
-        notif, ok := <-finishChan
-        if notif.finished || !ok {
-            break
+    registerChan := streamCommand("sh", "-c", "./test.sh")
+    finishChanA := wrapWithFinishChannel(receiveOutput, "A", registerChan)
+    finishChanB := wrapWithFinishChannel(receiveOutput, "B", registerChan)
+    finishChanC := wrapWithFinishChannel(receiveOutput, "C", registerChan)
+
+    finishedA := false
+    finishedB := false
+    finishedC := false
+    for !(finishedA && finishedB && finishedC) {
+        select {
+            case finished, ok := <-finishChanA:
+                if finished || !ok {
+                    finishedA = true
+                }
+            case finished, ok := <-finishChanB:
+                if finished || !ok {
+                    finishedB = true
+                }
+            case finished, ok := <-finishChanC:
+                if finished || !ok {
+                    finishedC = true
+                }
         }
     }
+    fmt.Print("Bye bye!\n")
+}
 
+func removeFromSlice(input []chan ReceiverNotification, chanToBeRemoved chan ReceiverNotification) []chan ReceiverNotification {
+    var result []chan ReceiverNotification
+    for _, c := range input {
+        if c != chanToBeRemoved {
+            result = append(result, c)
+        }
+    }
+    return result
 }
 
