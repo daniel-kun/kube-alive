@@ -7,6 +7,7 @@ import (
     "github.com/gorilla/websocket";
     "net/http";
     "sync";
+    "os";
     )
 
 func readInBackground (reader *bufio.Reader, channel chan string) {
@@ -116,6 +117,9 @@ func main() {
     var registerChan chan RegisterNotification
     registerChan = nil
     var registerChanLock sync.Mutex
+    http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
+        w.Write([]byte(os.Getenv("INCVER_VERSION")))
+    })
 	http.HandleFunc("/start", func(w http.ResponseWriter, r *http.Request) {
         var response string
         if registerChan != nil {

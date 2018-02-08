@@ -37,9 +37,29 @@ function listen2() {
 		log2.value = log2.value + "\r\n" + event.data
 	}
 }
+
+var xhr = new XMLHttpRequest();
+xhr.open('GET', '/version');
+
+// Track the state changes of the request.
+xhr.onreadystatechange = function () {
+    var DONE = 4; // readyState 4 means the request is done.
+    var OK = 200; // status 200 is a successful return.
+    if (xhr.readyState === DONE) {
+        if (xhr.status === OK) {
+            document.getElementById("version").innerText = xhr.responseText;
+        }
+    }
+};
+
+// Send the request to send-ajax-data.php
+xhr.send(null);	
 </script>
 
 <body>
+    <div>
+        <span>Version:&nbsp;</span><span id="version"></span>
+    </div>
 	<div>
 		<button onclick="start()">Start</button>
 	</div>
