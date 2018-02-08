@@ -4,6 +4,9 @@ import (
     "os/exec";
     "bufio";
     "fmt";
+    "github.com/gorilla/websocket";
+    "net/http";
+    "sync";
     )
 
 func readInBackground (reader *bufio.Reader, channel chan string) {
@@ -24,7 +27,6 @@ type ReceiverNotification struct {
 
 type RegisterNotification struct {
     registerChan chan ReceiverNotification
-    unregisterChan chan ReceiverNotification
 }
 
 func streamCommand(name string, arg ...string) chan RegisterNotification {
@@ -86,7 +88,7 @@ func streamCommand(name string, arg ...string) chan RegisterNotification {
 
 func receiveOutput(prefix string, registerChan chan RegisterNotification) {
     receiveChan := make(chan ReceiverNotification, 1)
-    registerChan <- RegisterNotification{receiveChan,nil}
+    registerChan <- RegisterNotification{receiveChan}
     for {
         notif, ok := <-receiveChan
         if ok {
@@ -103,50 +105,91 @@ func receiveOutput(prefix string, registerChan chan RegisterNotification) {
     fmt.Printf("%s closed\n", prefix)
 }
 
-func wrapWithFinishChannel(fnc func(string, chan RegisterNotification), prefix string, registerChan chan RegisterNotification) chan bool {
-    result := make(chan bool, 1)
-    go func() {
-        fnc(prefix, registerChan)
-        result <- true
-    } ()
-    return result;
-}
-
 func main() {
-    registerChan := streamCommand("sh", "-c", "./test.sh")
-    finishChanA := wrapWithFinishChannel(receiveOutput, "A", registerChan)
-    finishChanB := wrapWithFinishChannel(receiveOutput, "B", registerChan)
-    finishChanC := wrapWithFinishChannel(receiveOutput, "C", registerChan)
-
-    finishedA := false
-    finishedB := false
-    finishedC := false
-    for !(finishedA && finishedB && finishedC) {
-        select {
-            case finished, ok := <-finishChanA:
-                if finished || !ok {
-                    finishedA = true
-                }
-            case finished, ok := <-finishChanB:
-                if finished || !ok {
-                    finishedB = true
-                }
-            case finished, ok := <-finishChanC:
-                if finished || !ok {
-                    finishedC = true
-                }
-        }
+    var upgrader = websocket.Upgrader{
+        ReadBufferSize:  1024,
+        WriteBufferSize: 1024,
+        CheckOrigin: func(r *http.Request) bool {
+            return true
+        },
     }
-    fmt.Print("Bye bye!\n")
-}
-
-func removeFromSlice(input []chan ReceiverNotification, chanToBeRemoved chan ReceiverNotification) []chan ReceiverNotification {
-    var result []chan ReceiverNotification
-    for _, c := range input {
-        if c != chanToBeRemoved {
-            result = append(result, c)
+    var registerChan chan RegisterNotification
+    registerChan = nil
+    var registerChanLock sync.Mutex
+	http.HandleFunc("/start", func(w http.ResponseWriter, r *http.Request) {
+        var response string
+        if registerChan != nil {
+            response = "Command already running";
+            w.WriteHeader(http.StatusForbidden)
+        } else {
+            response = "Starting command"
+            registerChanLock.Lock()
+            registerChan = streamCommand("sh", "-c", "./test.sh")
+            cleanupChan := make(chan ReceiverNotification, 1)
+            registerChan <- RegisterNotification{registerChan: cleanupChan}
+            registerChanLock.Unlock()
+            go func () {
+                for {
+                    finished := false
+                    select {
+                        case notif, ok := <-cleanupChan:
+                            if notif.finished || !ok {
+                                finished = true
+                                registerChanLock.Lock()
+                                registerChan = nil
+                                registerChanLock.Unlock()
+                            }
+                    }
+                    if finished {
+                        break
+                    }
+                }
+            } ()
         }
-    }
-    return result
+        fmt.Println(response)
+        w.Write([]byte(response))
+    })
+	http.HandleFunc("/status", func(w http.ResponseWriter, r *http.Request) {
+        registerChanLock.Lock()
+        hasRegisterChan := registerChan != nil
+        registerChanLock.Unlock()
+
+        if !hasRegisterChan {
+            fmt.Print("Status requested, but no command running\n")
+        } else {
+            fmt.Print("Handling status request\n")
+            ws, err := upgrader.Upgrade(w, r, nil)
+            if err != nil {
+                fmt.Print(err)
+            } else {
+                receiveChan := make(chan ReceiverNotification, 1)
+                registerChanLock.Lock()
+                registerChan <- RegisterNotification{registerChan: receiveChan}
+                registerChanLock.Unlock()
+                for {
+                    finished := false
+                    select {
+                        case notif, ok := <-receiveChan:
+                            if !ok || notif.finished {
+                                writer, _ := ws.NextWriter(websocket.TextMessage)
+                                writer.Write([]byte("finished"))
+                                writer.Close()
+                                finished = true;
+                                break;
+                            }
+                            writer, _ := ws.NextWriter(websocket.TextMessage)
+                            writer.Write([]byte(notif.payload))
+                            writer.Close()
+                    }
+                    if finished {
+                        break
+                    }
+                }
+            }
+        }
+    })
+    http.Handle("/", http.FileServer(http.Dir("./static")))
+	fmt.Printf("'incver' server starting, listening to 8080 on all interfaces.\n")
+	http.ListenAndServe(":8080", nil)
 }
 

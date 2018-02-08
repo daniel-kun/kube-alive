@@ -1,0 +1,58 @@
+<html>
+
+<script>
+function start () {
+	var xhr = new XMLHttpRequest();
+	xhr.open('GET', '/start');
+	
+	// Track the state changes of the request.
+	xhr.onreadystatechange = function () {
+		var DONE = 4; // readyState 4 means the request is done.
+		var OK = 200; // status 200 is a successful return.
+		if (xhr.readyState === DONE) {
+			if (xhr.status === OK) {
+				console.log(xhr.responseText); // 'This is the output.'
+			} else {
+				console.log('Error: ' + xhr.status); // An error occurred during the request.
+			}
+		}
+	};
+	
+	// Send the request to send-ajax-data.php
+	xhr.send(null);	
+}
+
+function listen1() {
+	var ws = new WebSocket("ws://" + document.location.host + "/status")
+	ws.onmessage = function(event) {
+		var elem = document.getElementById("log1")
+		log1.value = log1.value + "\r\n" + event.data
+	}
+}
+
+function listen2() {
+	var ws = new WebSocket("ws://" + document.location.host + "/status")
+	ws.onmessage = function(event) {
+		var elem = document.getElementById("log2")
+		log2.value = log2.value + "\r\n" + event.data
+	}
+}
+</script>
+
+<body>
+	<div>
+		<button onclick="start()">Start</button>
+	</div>
+	<div>
+		<button onclick="listen1()">Listen 1</button>
+		<textarea id="log1" style="width:100%;height:400px">
+		</textarea>
+	</div>
+	<div>
+		<button onclick="listen2()">Listen 2</button>
+		<textarea id="log2" style="width:100%;height:400px">
+		</textarea>
+	</div>
+</body>
+
+</html>
