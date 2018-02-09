@@ -8,6 +8,7 @@ import (
     "net/http";
     "sync";
     "os";
+    "strconv";
     )
 
 func readInBackground (reader *bufio.Reader, channel chan string) {
@@ -106,6 +107,19 @@ func receiveOutput(prefix string, registerChan chan RegisterNotification) {
     fmt.Printf("%s closed\n", prefix)
 }
 
+func getVersion() string {
+    return os.Getenv("INCVER_VERSION")
+}
+
+func getVersionInt() int {
+    result, err := strconv.Atoi(getVersion())
+    if err == nil {
+        return result
+    } else {
+        return 0
+    }
+}
+
 func main() {
     var upgrader = websocket.Upgrader{
         ReadBufferSize:  1024,
@@ -118,7 +132,7 @@ func main() {
     registerChan = nil
     var registerChanLock sync.Mutex
     http.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
-        w.Write([]byte(os.Getenv("INCVER_VERSION")))
+        w.Write([]byte(getVersion()))
     })
 	http.HandleFunc("/start", func(w http.ResponseWriter, r *http.Request) {
         var response string
@@ -128,7 +142,9 @@ func main() {
         } else {
             response = "Starting command"
             registerChanLock.Lock()
-            registerChan = streamCommand("sh", "-c", "./test.sh")
+            registerChan = streamCommand(
+                    "./build.sh",
+                    fmt.Sprintf("%d", getVersionInt() + 1))
             cleanupChan := make(chan ReceiverNotification, 1)
             registerChan <- RegisterNotification{registerChan: cleanupChan}
             registerChanLock.Unlock()
@@ -142,6 +158,8 @@ func main() {
                                 registerChanLock.Lock()
                                 registerChan = nil
                                 registerChanLock.Unlock()
+                            } else {
+                                fmt.Print(notif.payload)
                             }
                     }
                     if finished {
@@ -193,7 +211,7 @@ func main() {
         }
     })
     http.Handle("/", http.FileServer(http.Dir("./static")))
-	fmt.Printf("'incver' server starting, listening to 8080 on all interfaces.\n")
+	fmt.Printf("'incver' server v%s starting, listening to 8080 on all interfaces.\n", getVersion())
 	http.ListenAndServe(":8080", nil)
 }
 

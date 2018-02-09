@@ -26,7 +26,7 @@ function listen1() {
 	var ws = new WebSocket("ws://" + document.location.host + "/status")
 	ws.onmessage = function(event) {
 		var elem = document.getElementById("log1")
-		log1.value = log1.value + "\r\n" + event.data
+		log1.value = log1.value + event.data
 	}
 }
 
@@ -34,7 +34,7 @@ function listen2() {
 	var ws = new WebSocket("ws://" + document.location.host + "/status")
 	ws.onmessage = function(event) {
 		var elem = document.getElementById("log2")
-		log2.value = log2.value + "\r\n" + event.data
+		log2.value = log2.value + event.data
 	}
 }
 
