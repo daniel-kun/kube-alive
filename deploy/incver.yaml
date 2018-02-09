@@ -1,0 +1,44 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  namespace: kube-alive
+  name: incver-deployment
+  labels:
+    app: incver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: incver
+  template:
+    metadata:
+      namespace: kube-alive
+      labels:
+        app: incver
+    spec:
+      containers:
+      - name: incver
+        image: incver:v1
+        volumeMounts:
+        - name: dockerSocket
+          mountPath: /var/lib/docker
+        securityContext:
+          privileged: true
+        ports:
+        - containerPort: 8080
+      volumes:
+        - name: dockerSocket
+          hostPath: /var/lib/docker
+---
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: kube-alive
+  name: incver
+spec:
+  selector:
+    app: incver
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
