@@ -1,2 +1,2 @@
 #/bin/sh
-kubectl set image deployment/incver incver=$DOCKER_REPO/incver:v$1
+kubectl -n kube-alive set image deployment/incver-deployment incver=$DOCKER_REPO/incver:v$1
