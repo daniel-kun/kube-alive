@@ -19,6 +19,9 @@ spec:
       containers:
       - name: incver
         image: incver:v1
+        env:
+        - name: DOCKER_REPO
+          value: %%DOCKER_REPO%%
         volumeMounts:
         - name: dockerSocket
           mountPath: /var/lib/docker

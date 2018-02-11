@@ -143,7 +143,7 @@ func main() {
             response = "Starting command"
             registerChanLock.Lock()
             registerChan = streamCommand(
-                    "./build.sh",
+                    "./build_and_deploy.sh",
                     fmt.Sprintf("%d", getVersionInt() + 1))
             cleanupChan := make(chan ReceiverNotification, 1)
             registerChan <- RegisterNotification{registerChan: cleanupChan}
