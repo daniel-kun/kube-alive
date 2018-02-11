@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: cpuhog
-        image: kubealive/cpuhog
+        image: %%DOCKER_REPO%%/cpuhog
         resources:
           requests:
             cpu: "1"

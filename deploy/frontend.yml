@@ -54,7 +54,7 @@ spec:
       containers:
       - name: frontend
         imagePullPolicy: Always
-        image: kubealive/frontend
+        image: %%DOCKER_REPO%%/frontend
         ports:
         - containerPort: 80
 ---
