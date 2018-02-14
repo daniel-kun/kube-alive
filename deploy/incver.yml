@@ -18,13 +18,15 @@ spec:
     spec:
       containers:
       - name: incver
-        image: %%DOCKER_REPO%%/incver:v1
+        image: %%DOCKER_REPO%%/incver%%ARCHSUFFIX%%:v2
         env:
+        - name: Foo
+          value: Trigger3
         - name: DOCKER_REPO
           value: %%DOCKER_REPO%%
         volumeMounts:
         - name: docker-socket
-          mountPath: /var/lib/docker
+          mountPath: /var/run/docker.sock
         securityContext:
           privileged: true
         ports:
@@ -32,8 +34,8 @@ spec:
       volumes:
         - name: docker-socket
           hostPath:
-            path: /var/lib/docker
-            type: Directory
+            path: /var/run/docker.sock
+            type: File
 ---
 kind: Service
 apiVersion: v1

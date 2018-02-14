@@ -3,7 +3,7 @@
 <script>
 function start () {
 	var xhr = new XMLHttpRequest();
-	xhr.open('GET', '/start');
+	xhr.open('GET', document.location.href + '/start');
 	
 	// Track the state changes of the request.
 	xhr.onreadystatechange = function () {
@@ -23,7 +23,7 @@ function start () {
 }
 
 function listen1() {
-	var ws = new WebSocket("ws://" + document.location.host + "/status")
+	var ws = new WebSocket("ws://" + document.location.href + "/status")
 	ws.onmessage = function(event) {
 		var elem = document.getElementById("log1")
 		log1.value = log1.value + event.data
@@ -31,7 +31,7 @@ function listen1() {
 }
 
 function listen2() {
-	var ws = new WebSocket("ws://" + document.location.host + "/status")
+	var ws = new WebSocket("ws://" + document.location.href + "/status")
 	ws.onmessage = function(event) {
 		var elem = document.getElementById("log2")
 		log2.value = log2.value + event.data
@@ -39,7 +39,7 @@ function listen2() {
 }
 
 var xhr = new XMLHttpRequest();
-xhr.open('GET', '/version');
+xhr.open('GET', document.location.href + '/version');
 
 // Track the state changes of the request.
 xhr.onreadystatechange = function () {

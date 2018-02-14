@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: healthcheck
-        image: %%DOCKER_REPO%%/healthcheck
+        image: %%DOCKER_REPO%%/healthcheck%%ARCHSUFFIX%%
         livenessProbe:
           httpGet:
             path: /

@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: getip
-        image: %%DOCKER_REPO%%/getip
+        image: %%DOCKER_REPO%%/getip%%ARCHSUFFIX%% 
         ports:
         - containerPort: 8080
 ---

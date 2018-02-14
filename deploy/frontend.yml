@@ -54,7 +54,10 @@ spec:
       containers:
       - name: frontend
         imagePullPolicy: Always
-        image: %%DOCKER_REPO%%/frontend
+        image: %%DOCKER_REPO%%/frontend%%ARCHSUFFIX%%
+        env:
+        - name: Version
+          value: Trigger3
         ports:
         - containerPort: 80
 ---

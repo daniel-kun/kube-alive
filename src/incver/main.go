@@ -38,17 +38,22 @@ func streamCommand(name string, arg ...string) chan RegisterNotification {
         cmd := exec.Command(name, arg...)
         cmdOutPipe, err := cmd.StdoutPipe()
         if err != nil {
+            fmt.Printf("Error 1: %s\n", err)
             return
         }
         cmdErrPipe, err := cmd.StderrPipe()
         if err != nil {
+            fmt.Printf("Error 2: %s\n", err)
             return
         }
         outReader := bufio.NewReader(cmdOutPipe)
         errReader := bufio.NewReader(cmdErrPipe)
         outChan := make(chan string, 1)
         errChan := make(chan string, 1)
-        cmd.Start()
+        errStart := cmd.Start()
+        if errStart != nil {
+            fmt.Printf("Error 3: %s", errStart)
+        }
         go readInBackground(outReader, outChan)
         go readInBackground(errReader, errChan)
         for exitOut, exitErr := false, false; !(exitOut && exitErr); {
@@ -82,7 +87,10 @@ func streamCommand(name string, arg ...string) chan RegisterNotification {
         }
         receiverChans = []chan ReceiverNotification{}
         close(registerChan)
-        cmd.Wait()
+        errCmd := cmd.Wait()
+        if errCmd != nil {
+            fmt.Printf("Error 4: %s\n", errCmd)
+        }
         fmt.Printf("cmd finished\n")
     } ()
     return registerChan
@@ -159,7 +167,7 @@ func main() {
                                 registerChan = nil
                                 registerChanLock.Unlock()
                             } else {
-                                fmt.Print(notif.payload)
+                                fmt.Printf(">> %s", notif.payload)
                             }
                     }
                     if finished {

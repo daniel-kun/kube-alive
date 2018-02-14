@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: cpuhog
-        image: %%DOCKER_REPO%%/cpuhog
+        image: %%DOCKER_REPO%%/cpuhog%%ARCHSUFFIX%%
         resources:
           requests:
             cpu: "1"

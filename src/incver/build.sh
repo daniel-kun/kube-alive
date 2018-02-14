@@ -1,3 +1,4 @@
 #!/bin/sh
-docker build -t incver:v$1 --build-arg BASEIMG=192.168.178.87:5000/go_docker --build-arg VERSION=$1 .
+set -e
+docker build -t ${DOCKER_REPO}/incver:v$1 --build-arg BASEIMG=${DOCKER_REPO}/go_docker_kubectl --build-arg VERSION=$1 --build-arg DOCKER_REPO=${DOCKER_REPO} .
 
