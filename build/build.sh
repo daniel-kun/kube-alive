@@ -21,10 +21,12 @@ case $ARCH in
     arm32v7)
             # We need these base images, because they contain qemu-armhf-satic
             GOLANG_BASEIMG=resin/raspberrypi3-golang 
+            GO_DOCKER_KUBECTL_BASEIMG=danielkun/go-docker-kubectl-arm32v7
             NGINX_BASEIMG=danielkun/nginx-elm-raspbian-arm32v7
         ;;
     amd64)
             GOLANG_BASEIMG=golang
+            GO_DOCKER_KUBECTL_BASEIMG=danielkun/go-docker-kubectl-x86_64
             NGINX_BASEIMG=danielkun/nginx-elm-debian-x86_64
         ;;
     *)
@@ -42,6 +44,8 @@ echo "Building healthcheck..." && \
 docker build -t "${DOCKER_REPO}/healthcheck_${ARCH}" src/healthcheck --build-arg "BASEIMG=${GOLANG_BASEIMG}" && \
 echo "Building cpuhog..." && \
 docker build -t "${DOCKER_REPO}/cpuhog_${ARCH}" src/cpuhog --build-arg "BASEIMG=${GOLANG_BASEIMG}" && \
+echo "Building incver..." && \
+docker build -t "${DOCKER_REPO}/incver_${ARCH}:v1" src/incver --build-arg "BASEIMG=${GO_DOCKER_KUBECTL_BASEIMG}" --build-arg "DOCKER_REPO=${DOCKER_REPO}" --build-arg VERSION=1 && \
 echo "Building frontend..." && \
 docker build -t "${DOCKER_REPO}/frontend_${ARCH}" src/frontend --build-arg "BASEIMG=${NGINX_BASEIMG}" && \
 echo "

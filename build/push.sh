@@ -21,12 +21,13 @@ pushMultiArch ()
     docker images | grep -E "^${DOCKER_REPO}/$1_(arm32v7|amd64)" && \
         manifest-tool push from-spec "${TEMPSPEC}" && \
         echo "Successfully pushed '$1' multiarch container." || \
-        echo "WARNING: Will not push '$1' multiarch container, since none of the architectures are available als containers locally."
+        echo "WARNING: Will not push '$1' multiarch container, since none of the architectures are available as containers locally."
     rm -f "${TEMPSPEC}"
 }
 
 pushMultiArch "getip"
 pushMultiArch "healthcheck"
 pushMultiArch "cpuhog"
+pushMultiArch "incver"
 pushMultiArch "frontend"
 
