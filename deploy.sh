@@ -1,10 +1,11 @@
 #!/bin/bash
+set -e
 if [ -z "`kubectl version`" ]; then
     echo "kubectl is not installed, aborting"
     exit 1
 fi
 
-export KUBEALIVE_PUBLICIP=`kubectl config view --minify=true | grep server | sed 's/.*http[s]:\/\/\(.*\):.*/\1/'`
+export KUBEALIVE_PUBLICIP=`kubectl config view --minify=true | grep server | sed 's/.*http:\/\/\(.*\)/\1/'`
 echo "Using ${KUBEALIVE_PUBLICIP} as the exposed IP to access kube-alive."
 
 ARCHSUFFIX=
@@ -18,19 +19,26 @@ if [ $# -eq 1 ] && [ $1 = "local" ]; then
     fi
 
     echo "Deploying locally for architecture ${ARCHSUFFIX} from deploy/."
-    if [ ! -n "${DOCKER_REPO}" ]; then
-        echo "\$DOCKER_REPO not set, aborting"
+    if [ ! -n "${KUBEALIVE_DOCKER_REPO}" ]; then
+        echo "\$KUBEALIVE_DOCKER_REPO not set, aborting"
         exit 1
     else
-        echo "Using docker repo \"${DOCKER_REPO}\""
+        echo "Using docker repo \"${KUBEALIVE_DOCKER_REPO}\""
     fi
 else
     echo "Deploying from github."
-    if [ ! -n "${DOCKER_REPO}" ]; then
-        echo "\$DOCKER_REPO not set, using \"kubealive\" as a default"
-        export DOCKER_REPO=kubealive
+    if [ ! -n "${KUBEALIVE_DOCKER_REPO}" ]; then
+        echo "\$KUBEALIVE_DOCKER_REPO not set, using \"kubealive\" as a default"
+        export KUBEALIVE_DOCKER_REPO=kubealive
     fi
 fi
+
+if [ -z "${KUBEALIVE_BRANCH}" ]; then
+    BRANCH_SUFFIX=
+else
+    BRANCH_SUFFIX="_${KUBEALIVE_BRANCH}"
+fi
+    
 
 for service in `echo "namespace
 getip
@@ -39,9 +47,9 @@ cpuhog
 frontend
 incver"`; do
     if [ ${LOCAL} -eq 1 ]; then
-        cat "./deploy/${service}.yml" | sed "s/%%KUBEALIVE_PUBLICIP%%/${KUBEALIVE_PUBLICIP}/" | sed "s/%%DOCKER_REPO%%/${DOCKER_REPO}/" | sed "s/%%ARCHSUFFIX%%/${ARCHSUFFIX}/" | kubectl apply -f -
+        cat "./deploy/${service}.yml" | sed "s/%%KUBEALIVE_PUBLICIP%%/${KUBEALIVE_PUBLICIP}/" | sed "s/%%KUBEALIVE_DOCKER_REPO%%/${KUBEALIVE_DOCKER_REPO}/" | sed "s/%%ARCHSUFFIX%%/${ARCHSUFFIX}/" | sed "s/%%BRANCH_SUFFIX%%/${BRANCH_SUFFIX}/" | kubectl apply -f -
     else
-        curl -sSL "https://raw.githubusercontent.com/daniel-kun/kube-alive/master/deploy/${service}.yml" | sed "s/%%KUBEALIVE_PUBLICIP%%/${KUBEALIVE_PUBLICIP}/" | sed "s/%%DOCKER_REPO%%/${DOCKER_REPO}/" | sed "s/%%ARCHSUFFIX%%/${ARCHSUFFIX}/" | kubectl apply -f -
+        curl -sSL "https://raw.githubusercontent.com/daniel-kun/kube-alive/master/deploy/${service}.yml" | sed "s/%%KUBEALIVE_PUBLICIP%%/${KUBEALIVE_PUBLICIP}/" | sed "s/%%KUBEALIVE_DOCKER_REPO%%/${KUBEALIVE_DOCKER_REPO}/" | sed "s/%%ARCHSUFFIX%%/${ARCHSUFFIX}/" | sed "s/%%BRANCH_SUFFIX%%/${BRANCH_SUFFIX}/" | kubectl apply -f -
     fi
 done
 

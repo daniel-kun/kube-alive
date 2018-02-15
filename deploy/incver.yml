@@ -18,12 +18,12 @@ spec:
     spec:
       containers:
       - name: incver
-        image: %%DOCKER_REPO%%/incver%%ARCHSUFFIX%%:v2
+        image: %%KUBEALIVE_DOCKER_REPO%%/incver%%BRANCH_SUFFIX%%%%ARCHSUFFIX%%:v1
         env:
-        - name: Foo
-          value: Trigger3
-        - name: DOCKER_REPO
-          value: %%DOCKER_REPO%%
+        - name: KUBEALIVE_DOCKER_REPO
+          value: %%KUBEALIVE_DOCKER_REPO%%
+        - name: BRANCH_SUFFIX
+          value: %%BRANCH_SUFFIX%%
         volumeMounts:
         - name: docker-socket
           mountPath: /var/run/docker.sock

@@ -1,3 +1,3 @@
 #!/bin/sh
 set -e
-docker push ${DOCKER_REPO}/incver:v$1
+docker push ${KUBEALIVE_DOCKER_REPO}/incver:v$1

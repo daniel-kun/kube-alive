@@ -1,6 +1,14 @@
 #!/bin/sh
-if [ ! -n "${DOCKER_REPO}" ] || [ ! -n "${DOCKER_USERNAME}" ] || [ ! -n "${DOCKER_PASSWORD}" ]; then
-  echo "Env vars DOCKER_REPO, DOCKER_USERNAME and DOCKER_PASSWORD must be set.";
+set -e
+if [ -z "${KUBEALIVE_BRANCH}" ]; then
+    BRANCH_SUFFIX=
+else
+    BRANCH_SUFFIX="_${KUBEALIVE_BRANCH}"
+fi
+    
+
+if [ ! -n "${KUBEALIVE_DOCKER_REPO}" ] || [ ! -n "${DOCKER_USERNAME}" ] || [ ! -n "${DOCKER_PASSWORD}" ]; then
+  echo "Env vars KUBEALIVE_DOCKER_REPO, DOCKER_USERNAME and DOCKER_PASSWORD must be set.";
   exit 1
 fi
 docker login -u "${DOCKER_USERNAME}" -p "${DOCKER_PASSWORD}" 
@@ -9,19 +17,23 @@ if [ $? != 0 ]; then
     exit 1;
 fi
 
-echo "Successfully logged in as ${DOCKER_USERNAME}, will push to repo ${DOCKER_REPO}"
+echo "Successfully logged in as ${DOCKER_USERNAME}, will push to repo ${KUBEALIVE_DOCKER_REPO}"
 
 pushMultiArch ()
 {
     TEMPSPEC=`tempfile`
-    docker images | grep -e "^${DOCKER_REPO}/$1_arm32v7" >/dev/zero && docker push "${DOCKER_REPO}/$1_arm32v7"
-    docker images | grep -e "^${DOCKER_REPO}/$1_amd64" >/dev/zero && docker push "${DOCKER_REPO}/$1_amd64"
-    sed "s/%%DOCKER_REPO%%/${DOCKER_REPO}/g" src/$1/multiarch.templspec > "${TEMPSPEC}" 
+    docker images | grep -e "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_arm32v7" > /dev/zero && docker push "${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_arm32v7"
+    docker images | grep -e "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_amd64" > /dev/zero && docker push "${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_amd64"
+    sed "s/%%KUBEALIVE_DOCKER_REPO%%/${KUBEALIVE_DOCKER_REPO}/g" src/$1/multiarch.templspec | sed "s/%%BRANCH_SUFFIX%%/${BRANCH_SUFFIX}/" > "${TEMPSPEC}" 
 
-    docker images | grep -E "^${DOCKER_REPO}/$1_(arm32v7|amd64)" && \
+    if docker images | grep -E "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_arm32v7" && \
+        docker images | grep -E "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_amd64"; then
         manifest-tool push from-spec "${TEMPSPEC}" && \
         echo "Successfully pushed '$1' multiarch container." || \
-        echo "WARNING: Will not push '$1' multiarch container, since none of the architectures are available as containers locally."
+        echo "Failed pushing '$1' multiarch container."
+    else
+        echo "WARNING: Will not push '$1' multiarch container, since not all architectures are available as containers locally."
+    fi
     rm -f "${TEMPSPEC}"
 }
 

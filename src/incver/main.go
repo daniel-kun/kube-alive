@@ -9,7 +9,6 @@ import (
     "sync";
     "os";
     "strconv";
-    "path/filepath";
     )
 
 func readInBackground (reader *bufio.Reader, channel chan string) {

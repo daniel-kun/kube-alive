@@ -54,7 +54,7 @@ spec:
       containers:
       - name: frontend
         imagePullPolicy: Always
-        image: %%DOCKER_REPO%%/frontend%%ARCHSUFFIX%%
+        image: %%KUBEALIVE_DOCKER_REPO%%/frontend%%BRANCH_SUFFIX%%%%ARCHSUFFIX%%
         env:
         - name: Version
           value: Trigger3

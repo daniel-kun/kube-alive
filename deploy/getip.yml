@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: getip
-        image: %%DOCKER_REPO%%/getip%%ARCHSUFFIX%% 
+        image: %%KUBEALIVE_DOCKER_REPO%%/getip%%BRANCH_SUFFIX%%%%ARCHSUFFIX%% 
         ports:
         - containerPort: 8080
 ---

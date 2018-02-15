@@ -1,8 +1,8 @@
 #!/bin/sh
 
 # Check for mandatory parameters: 
-if [ ! -n "${DOCKER_REPO}" ]; then
-    echo "Env var DOCKER_REPO must be set.";
+if [ ! -n "${KUBEALIVE_DOCKER_REPO}" ]; then
+    echo "Env var KUBEALIVE_DOCKER_REPO must be set.";
     exit 1
 fi
 
@@ -15,6 +15,15 @@ if [ -z "${ARCH}" ]; then
         ARCH=amd64
     fi
 fi
+
+if [ -z "${KUBEALIVE_BRANCH}" ]; then
+    echo "Building for docker repository ${KUBEALIVE_DOCKER_REPO}, without branch suffix."
+    BRANCH_SUFFIX=
+else
+    BRANCH_SUFFIX="_${KUBEALIVE_BRANCH}"
+    echo "Building for docker repository ${KUBEALIVE_DOCKER_REPO}, with branch suffix ${KUBEALIVE_BRANCH}."
+fi
+
 
 # Set appropriate BASEIMG depending on $ARCH:
 case $ARCH in
@@ -39,16 +48,16 @@ echo "Building docker images for architecture ${ARCH}."
 
 # Now build the docker containers:
 echo "Building getip..."
-docker build -t "${DOCKER_REPO}/getip_${ARCH}" src/getip --build-arg "BASEIMG=${GOLANG_BASEIMG}" && \
+docker build -t "${KUBEALIVE_DOCKER_REPO}/getip${BRANCH_SUFFIX}_${ARCH}" src/getip --build-arg "BASEIMG=${GOLANG_BASEIMG}" && \
 echo "Building healthcheck..." && \
-docker build -t "${DOCKER_REPO}/healthcheck_${ARCH}" src/healthcheck --build-arg "BASEIMG=${GOLANG_BASEIMG}" && \
+docker build -t "${KUBEALIVE_DOCKER_REPO}/healthcheck${BRANCH_SUFFIX}_${ARCH}" src/healthcheck --build-arg "BASEIMG=${GOLANG_BASEIMG}" && \
 echo "Building cpuhog..." && \
-docker build -t "${DOCKER_REPO}/cpuhog_${ARCH}" src/cpuhog --build-arg "BASEIMG=${GOLANG_BASEIMG}" && \
+docker build -t "${KUBEALIVE_DOCKER_REPO}/cpuhog${BRANCH_SUFFIX}_${ARCH}" src/cpuhog --build-arg "BASEIMG=${GOLANG_BASEIMG}" && \
 echo "Building incver..." && \
-docker build -t "${DOCKER_REPO}/incver_${ARCH}:v1" src/incver --build-arg "BASEIMG=${GO_DOCKER_KUBECTL_BASEIMG}" --build-arg "DOCKER_REPO=${DOCKER_REPO}" --build-arg VERSION=1 && \
+docker build -t "${KUBEALIVE_DOCKER_REPO}/incver${BRANCH_SUFFIX}_${ARCH}:v1" src/incver --build-arg "BASEIMG=${GO_DOCKER_KUBECTL_BASEIMG}" --build-arg "DOCKER_REPO=${DOCKER_REPO}" --build-arg VERSION=1 && \
 echo "Building frontend..." && \
-docker build -t "${DOCKER_REPO}/frontend_${ARCH}" src/frontend --build-arg "BASEIMG=${NGINX_BASEIMG}" && \
+docker build -t "${KUBEALIVE_DOCKER_REPO}/frontend${BRANCH_SUFFIX}_${ARCH}" src/frontend --build-arg "BASEIMG=${NGINX_BASEIMG}" && \
 echo "
 Build for CPU ${ARCH} finished.
-You can now 'make push' to push the built containers to your registry. (You have to set DOCKER_REPO, DOCKER_USERNAME and DOCKER_PASSWORD first.)" && exit 0  || echo "Build failed" && exit 1
+You can now 'make push' to push the built containers to your registry. (You have to set KUBEALIVE_DOCKER_REPO, DOCKER_USERNAME and DOCKER_PASSWORD first.)" && exit 0  || echo "Build failed" && exit 1
 
