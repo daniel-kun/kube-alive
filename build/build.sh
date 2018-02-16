@@ -54,7 +54,7 @@ docker build -t "${KUBEALIVE_DOCKER_REPO}/healthcheck${BRANCH_SUFFIX}_${ARCH}" s
 echo "Building cpuhog..." && \
 docker build -t "${KUBEALIVE_DOCKER_REPO}/cpuhog${BRANCH_SUFFIX}_${ARCH}" src/cpuhog --build-arg "BASEIMG=${GOLANG_BASEIMG}" && \
 echo "Building incver..." && \
-docker build -t "${KUBEALIVE_DOCKER_REPO}/incver${BRANCH_SUFFIX}_${ARCH}:v1" src/incver --build-arg "BASEIMG=${GO_DOCKER_KUBECTL_BASEIMG}" --build-arg "DOCKER_REPO=${DOCKER_REPO}" --build-arg VERSION=1 && \
+docker build -t "${KUBEALIVE_DOCKER_REPO}/incver${BRANCH_SUFFIX}_${ARCH}:v1" src/incver --build-arg "BASEIMG=${GO_DOCKER_KUBECTL_BASEIMG}" --build-arg "KUBEALIVE_DOCKER_REPO=${KUBEALIVE_DOCKER_REPO}" --build-arg VERSION=1 && \
 echo "Building frontend..." && \
 docker build -t "${KUBEALIVE_DOCKER_REPO}/frontend${BRANCH_SUFFIX}_${ARCH}" src/frontend --build-arg "BASEIMG=${NGINX_BASEIMG}" && \
 echo "

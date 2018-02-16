@@ -22,24 +22,28 @@ echo "Successfully logged in as ${DOCKER_USERNAME}, will push to repo ${KUBEALIV
 pushMultiArch ()
 {
     TEMPSPEC=`tempfile`
-    docker images | grep -e "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_arm32v7" > /dev/zero && docker push "${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_arm32v7"
-    docker images | grep -e "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_amd64" > /dev/zero && docker push "${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_amd64"
-    sed "s/%%KUBEALIVE_DOCKER_REPO%%/${KUBEALIVE_DOCKER_REPO}/g" src/$1/multiarch.templspec | sed "s/%%BRANCH_SUFFIX%%/${BRANCH_SUFFIX}/" > "${TEMPSPEC}" 
+    docker images | grep -e "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_arm32v7:$2" > /dev/zero && docker push "${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_arm32v7:$2"
+    docker images | grep -e "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_amd64:$2" > /dev/zero && docker push "${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_amd64:$2"
+    sed "s/%%KUBEALIVE_DOCKER_REPO%%/${KUBEALIVE_DOCKER_REPO}/g" src/$1/multiarch.templspec | sed "s/%%BRANCH_SUFFIX%%/${BRANCH_SUFFIX}/" | \
+        sed "s/%%TAG%%/$2/g" > "${TEMPSPEC}" 
 
-    if docker images | grep -E "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_arm32v7" && \
-        docker images | grep -E "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_amd64"; then
-        manifest-tool push from-spec "${TEMPSPEC}" && \
-        echo "Successfully pushed '$1' multiarch container." || \
-        echo "Failed pushing '$1' multiarch container."
+    if docker images | grep -E "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_arm32v7 *$2" && \
+        docker images | grep -E "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_amd64 *$2"; then
+        if manifest-tool push from-spec "${TEMPSPEC}"; then
+            echo "Successfully pushed '$1' multiarch container."
+        else
+                echo "Failed pushing '$1' multiarch container."
+            exit 1
+        fi
     else
         echo "WARNING: Will not push '$1' multiarch container, since not all architectures are available as containers locally."
     fi
     rm -f "${TEMPSPEC}"
 }
 
-pushMultiArch "getip"
-pushMultiArch "healthcheck"
-pushMultiArch "cpuhog"
-pushMultiArch "incver"
-pushMultiArch "frontend"
+pushMultiArch "getip" "latest"
+pushMultiArch "healthcheck" "latest"
+pushMultiArch "cpuhog" "latest"
+pushMultiArch "incver" "v1"
+pushMultiArch "frontend" "latest"
 
