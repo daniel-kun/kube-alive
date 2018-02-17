@@ -55,9 +55,6 @@ spec:
       - name: frontend
         imagePullPolicy: Always
         image: %%KUBEALIVE_DOCKER_REPO%%/frontend%%BRANCH_SUFFIX%%%%ARCHSUFFIX%%
-        env:
-        - name: Version
-          value: Trigger3
         ports:
         - containerPort: 80
 ---
@@ -72,6 +69,7 @@ spec:
   externalIPs:
   - %%KUBEALIVE_PUBLICIP%%
   ports:
-  - protocol: TCP
+  - name: http
+    protocol: TCP
     port: 80
     targetPort: 80

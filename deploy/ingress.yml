@@ -1,0 +1,24 @@
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: kube-alive
+  name: frontend
+spec:
+  type: NodePort
+  selector:
+    app: frontend
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  namespace: kube-alive
+  name: frontend-ingress
+spec:
+  backend:
+    serviceName: frontend
+    servicePort: 80
+
