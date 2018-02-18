@@ -16,7 +16,7 @@ before_install:
   - wget -O manifest-tool https://github.com/estesp/manifest-tool/releases/download/v0.7.0/manifest-tool-linux-amd64 && chmod +x manifest-tool && sudo mv manifest-tool /usr/bin
 
 script:
-  - make cross-build
+  - KUBEALIVE_BRANCH=${TRAVIS_BRANCH} make cross-build
 
 after_success:
-  - make push
+  - KUBEALIVE_BRANCH=${TRAVIS_BRANCH} make push

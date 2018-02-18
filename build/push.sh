@@ -1,11 +1,20 @@
 #!/bin/sh
 set -e
 if [ -z "${KUBEALIVE_BRANCH}" ]; then
+    echo "Building for docker repository ${KUBEALIVE_DOCKER_REPO}, without branch suffix."
     BRANCH_SUFFIX=
+    # Check for mandatory parameters: 
+    if [ ! -n "${KUBEALIVE_DOCKER_REPO}" ]; then
+        KUBEALIVE_DOCKER_REPO=kubealive
+    fi
 else
+    if [ ! -n "${KUBEALIVE_DOCKER_REPO}" ]; then
+        echo "Env var KUBEALIVE_DOCKER_REPO must be set.";
+        exit 1
+    fi
     BRANCH_SUFFIX="_${KUBEALIVE_BRANCH}"
+    echo "Building for docker repository ${KUBEALIVE_DOCKER_REPO}, with branch suffix ${KUBEALIVE_BRANCH}."
 fi
-    
 
 if [ ! -n "${KUBEALIVE_DOCKER_REPO}" ] || [ ! -n "${DOCKER_USERNAME}" ] || [ ! -n "${DOCKER_PASSWORD}" ]; then
   echo "Env vars KUBEALIVE_DOCKER_REPO, DOCKER_USERNAME and DOCKER_PASSWORD must be set.";
@@ -22,8 +31,8 @@ echo "Successfully logged in as ${DOCKER_USERNAME}, will push to repo ${KUBEALIV
 pushMultiArch ()
 {
     TEMPSPEC=`tempfile`
-    docker images | grep -e "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_arm32v7:$2" > /dev/zero && docker push "${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_arm32v7:$2"
-    docker images | grep -e "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_amd64:$2" > /dev/zero && docker push "${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_amd64:$2"
+    docker images | grep -e "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_arm32v7 *$2" > /dev/zero && docker push "${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_arm32v7:$2"
+    docker images | grep -e "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_amd64 *$2" > /dev/zero && docker push "${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_amd64:$2"
     sed "s/%%KUBEALIVE_DOCKER_REPO%%/${KUBEALIVE_DOCKER_REPO}/g" src/$1/multiarch.templspec | sed "s/%%BRANCH_SUFFIX%%/${BRANCH_SUFFIX}/" | \
         sed "s/%%TAG%%/$2/g" > "${TEMPSPEC}" 
 

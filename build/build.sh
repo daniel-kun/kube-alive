@@ -1,9 +1,19 @@
 #!/bin/sh
 
-# Check for mandatory parameters: 
-if [ ! -n "${KUBEALIVE_DOCKER_REPO}" ]; then
-    echo "Env var KUBEALIVE_DOCKER_REPO must be set.";
-    exit 1
+if [ -z "${KUBEALIVE_BRANCH}" ]; then
+    echo "Building for docker repository ${KUBEALIVE_DOCKER_REPO}, without branch suffix."
+    BRANCH_SUFFIX=
+    # Check for mandatory parameters: 
+    if [ ! -n "${KUBEALIVE_DOCKER_REPO}" ]; then
+        KUBEALIVE_DOCKER_REPO=kubealive
+    fi
+else
+    if [ ! -n "${KUBEALIVE_DOCKER_REPO}" ]; then
+        echo "Env var KUBEALIVE_DOCKER_REPO must be set.";
+        exit 1
+    fi
+    BRANCH_SUFFIX="_${KUBEALIVE_BRANCH}"
+    echo "Building for docker repository ${KUBEALIVE_DOCKER_REPO}, with branch suffix ${KUBEALIVE_BRANCH}."
 fi
 
 # Find out architecture or read it from command line:
@@ -14,14 +24,6 @@ if [ -z "${ARCH}" ]; then
     else
         ARCH=amd64
     fi
-fi
-
-if [ -z "${KUBEALIVE_BRANCH}" ]; then
-    echo "Building for docker repository ${KUBEALIVE_DOCKER_REPO}, without branch suffix."
-    BRANCH_SUFFIX=
-else
-    BRANCH_SUFFIX="_${KUBEALIVE_BRANCH}"
-    echo "Building for docker repository ${KUBEALIVE_DOCKER_REPO}, with branch suffix ${KUBEALIVE_BRANCH}."
 fi
 
 
