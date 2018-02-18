@@ -16,7 +16,8 @@ before_install:
   - wget -O manifest-tool https://github.com/estesp/manifest-tool/releases/download/v0.7.0/manifest-tool-linux-amd64 && chmod +x manifest-tool && sudo mv manifest-tool /usr/bin
 
 script:
-    - if [ "${TRAVIS_BRANCH}" = "master" ]; then export KUBEALIVE_BRANCH=""; export KUBEALIVE_DOCKER_REPO=kubealive; echo "WARNING: Building master for live kubealive repo"; make cross-build; else export KUBEALIVE_BRANCH="${TRAVIS_BRANCH}"; make cross-build; fi
+    - ./build/travis-make cross-build
 
 after_success:
-    - if [ "${TRAVIS_BRANCH}" = "master" ]; then export KUBEALIVE_BRANCH=""; export KUBEALIVE_DOCKER_REPO=kubealive; echo "WARNING: Pushing live kubealive repo"; make push; else export KUBEALIVE_BRANCH="${TRAVIS_BRANCH}"; make push; fi
+    - ./build/travis-make push
+
