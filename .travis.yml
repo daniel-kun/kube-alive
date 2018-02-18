@@ -16,8 +16,8 @@ before_install:
   - wget -O manifest-tool https://github.com/estesp/manifest-tool/releases/download/v0.7.0/manifest-tool-linux-amd64 && chmod +x manifest-tool && sudo mv manifest-tool /usr/bin
 
 script:
-    - ./build/travis-make cross-build
+    - ./build/travis-make.sh cross-build
 
 after_success:
-    - ./build/travis-make push
+    - ./build/travis-make.sh push
 
