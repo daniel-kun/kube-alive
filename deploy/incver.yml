@@ -1,0 +1,51 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  namespace: kube-alive
+  name: incver-deployment
+  labels:
+    app: incver
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: incver
+  template:
+    metadata:
+      namespace: kube-alive
+      labels:
+        app: incver
+    spec:
+      containers:
+      - name: incver
+        image: %%KUBEALIVE_DOCKER_REPO%%/incver%%BRANCH_SUFFIX%%%%ARCHSUFFIX%%:v1
+        env:
+        - name: KUBEALIVE_DOCKER_REPO
+          value: %%KUBEALIVE_DOCKER_REPO%%
+        - name: BRANCH_SUFFIX
+          value: %%BRANCH_SUFFIX%%
+        volumeMounts:
+        - name: docker-socket
+          mountPath: /var/run/docker.sock
+        securityContext:
+          privileged: true
+        ports:
+        - containerPort: 8080
+      volumes:
+        - name: docker-socket
+          hostPath:
+            path: /var/run/docker.sock
+            type: File
+---
+kind: Service
+apiVersion: v1
+metadata:
+  namespace: kube-alive
+  name: incver
+spec:
+  selector:
+    app: incver
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080

@@ -17,10 +17,10 @@ spec:
     spec:
       containers:
       - name: cpuhog
-        image: kubealive/cpuhog
+        image: %%KUBEALIVE_DOCKER_REPO%%/cpuhog%%BRANCH_SUFFIX%%%%ARCHSUFFIX%%
         resources:
           requests:
-            cpu: "1"
+            cpu: "0.25"
         ports:
         - containerPort: 8080
 ---

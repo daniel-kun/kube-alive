@@ -54,7 +54,7 @@ spec:
       containers:
       - name: frontend
         imagePullPolicy: Always
-        image: kubealive/frontend
+        image: %%KUBEALIVE_DOCKER_REPO%%/frontend%%BRANCH_SUFFIX%%%%ARCHSUFFIX%%
         ports:
         - containerPort: 80
 ---
@@ -69,6 +69,7 @@ spec:
   externalIPs:
   - %%KUBEALIVE_PUBLICIP%%
   ports:
-  - protocol: TCP
+  - name: http
+    protocol: TCP
     port: 80
     targetPort: 80

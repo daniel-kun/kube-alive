@@ -1,0 +1,13 @@
+image: %%KUBEALIVE_DOCKER_REPO%%/incver%%BRANCH_SUFFIX%%:%%TAG%%
+manifests:
+  -
+    image: %%KUBEALIVE_DOCKER_REPO%%/incver%%BRANCH_SUFFIX%%_arm32v7:%%TAG%%
+    platform:
+      architecture: arm
+      os: linux
+  -
+    image: %%KUBEALIVE_DOCKER_REPO%%/incver%%BRANCH_SUFFIX%%_amd64:%%TAG%%
+    platform:
+      architecture: amd64
+      os: linux
+

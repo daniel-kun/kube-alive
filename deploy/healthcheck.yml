@@ -18,7 +18,7 @@ spec:
     spec:
       containers:
       - name: healthcheck
-        image: kubealive/healthcheck
+        image: %%KUBEALIVE_DOCKER_REPO%%/healthcheck%%BRANCH_SUFFIX%%%%ARCHSUFFIX%%
         livenessProbe:
           httpGet:
             path: /

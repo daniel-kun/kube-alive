@@ -1,12 +1,12 @@
-image: %%DOCKER_REPO%%/cpuhog:latest
+image: %%KUBEALIVE_DOCKER_REPO%%/cpuhog%%BRANCH_SUFFIX%%:latest
 manifests:
   -
-    image: %%DOCKER_REPO%%/cpuhog_arm32v7
+    image: %%KUBEALIVE_DOCKER_REPO%%/cpuhog%%BRANCH_SUFFIX%%_arm32v7
     platform:
       architecture: arm
       os: linux
   -
-    image: %%DOCKER_REPO%%/cpuhog_amd64
+    image: %%KUBEALIVE_DOCKER_REPO%%/cpuhog%%BRANCH_SUFFIX%%_amd64
     platform:
       architecture: amd64
       os: linux
