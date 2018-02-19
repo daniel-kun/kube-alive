@@ -1,5 +1,3 @@
-<img src="https://raw.githubusercontent.com/daniel-kun/kube-alive/master/docs/kube-pi.png" width="420" alt="Image of a Raspberry Pi cluster">
-
 # Kubernetes: It's alive!
 
 You can find a dashboard with experiments with Kubernetes (k8s) to observe it's behaviour in real scenarios in this project.
