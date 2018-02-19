@@ -3,12 +3,22 @@
 # Kubernetes: It's alive!
 
 You can find a dashboard with experiments with Kubernetes (k8s) to observe it's behaviour in real scenarios in this project.
-You should have a k8s cluster up and running on amd64 or arm32v7 to deploy the tools from this repository.
-I used a Raspberry Pi cluster with five nodes and set them up as described by Scott Hanselman here: https://www.hanselman.com/blog/HowToBuildAKubernetesClusterWithARMRaspberryPiThenRunNETCoreOnOpenFaas.aspx. Or you can simply use a [minikube](https://kubernetes.io/docs/getting-started-guides/minikube/) on your local development box.
+You should have a k8s cluster up and running to deploy the tools from this repository.
+
+## Tested platforms
+
+kube-alive is tested on the following platforms, with Kubernetes version 1.8 and 1.9:
+
+- Minikube (see [official guide] (https://kubernetes.io/docs/getting-started-guides/minikube/).)
+- Bare metal on a Raspberry Pi 3 cluster (see [a guide by Scott Hanselman] (https://www.hanselman.com/blog/HowToBuildAKubernetesClusterWithARMRaspberryPiThenRunNETCoreOnOpenFaas.aspx).)
+- Microsoft Azure Container Service AKS (see [official guide](https://docs.microsoft.com/en-us/azure/aks/intro-kubernetes#using-azure-container-service-aks).)
+- Google Kubernetes Engine GKE (see [official guide](https://cloud.google.com/kubernetes-engine/docs/quickstart).)
 
 ## Deployment
 
-*Prerequisites:* You need to have `kubectl` installed and configured to point at a running cluster that you have admin access to. Supported CPU architectures are amd64 and arm32v7. It's tested on Kubernetes 1.9.1 on ubuntu on amd64 and raspbian on Raspberry Pis. You can even get this running on Windows by using minikube and [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10) with Ubuntu.
+*Prerequisites:*
+* You need to have `kubectl` installed and configured to point at a running cluster that you have admin access to.
+* If you are running on Google Kubernetes Engine, your default account does not have the privilege to grant more privileges. To circumvent this, you can grant yourself cluster-admin rights: `kubectl create clusterrolebinding root-cluster-admin-binding --clusterrole=cluster-admin --user=<your-google-mail-address>`
 
 You can deploy kube-alive to your local cluster with this single command:
 
