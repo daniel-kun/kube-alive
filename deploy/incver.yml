@@ -1,3 +1,38 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: kube-alive
+  name: deployment-update
+rules:
+- apiGroups: ["extensions"]
+  resources: ["deployments"]
+  verbs: ["get", "update", "patch"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: kube-alive
+  name: incver-service-account
+automountServiceAccountToken: true
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: kube-alive
+  name: incver-can-update-deployments
+subjects:
+- kind: User
+  name: incver-service-account
+  namespace: kube-alive
+  apiGroup: rbac.authorization.k8s.io
+- kind: ServiceAccount
+  namespace: kube-alive
+  name: incver-service-account
+roleRef:
+  kind: Role
+  name: deployment-update
+  apiGroup: rbac.authorization.k8s.io
+---
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:
@@ -16,6 +51,7 @@ spec:
       labels:
         app: incver
     spec:
+      serviceAccountName: incver-service-account
       containers:
       - name: incver
         image: %%KUBEALIVE_DOCKER_REPO%%/incver%%BRANCH_SUFFIX%%%%ARCHSUFFIX%%:v1
