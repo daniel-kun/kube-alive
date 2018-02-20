@@ -32,12 +32,12 @@ case $ARCH in
     arm32v7)
             # We need these base images, because they contain qemu-armhf-satic
             GOLANG_BASEIMG=resin/raspberrypi3-golang 
-            GO_KUBECTL_BASEIMG=danielkun/go-docker-kubectl-arm32v7
+            GO_KUBECTL_BASEIMG=danielkun/go-kubectl-arm32v7
             NGINX_BASEIMG=danielkun/nginx-elm-raspbian-arm32v7
         ;;
     amd64)
             GOLANG_BASEIMG=golang
-            GO_KUBECTL_BASEIMG=danielkun/go-docker-kubectl-x86_64
+            GO_KUBECTL_BASEIMG=danielkun/go-kubectl-x86_64
             NGINX_BASEIMG=danielkun/nginx-elm-debian-x86_64
         ;;
     *)
