@@ -53,6 +53,9 @@ pushMultiArch ()
 pushMultiArch "getip" "latest"
 pushMultiArch "healthcheck" "latest"
 pushMultiArch "cpuhog" "latest"
-pushMultiArch "incver" "v1"
+for i in 1 2 3 4 5
+do
+    pushMultiArch "incver" "v$i"
+done
 pushMultiArch "frontend" "latest"
 

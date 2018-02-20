@@ -24,18 +24,12 @@ spec:
           value: %%KUBEALIVE_DOCKER_REPO%%
         - name: BRANCH_SUFFIX
           value: %%BRANCH_SUFFIX%%
-        volumeMounts:
-        - name: docker-socket
-          mountPath: /var/run/docker.sock
+        - name: ARCHSUFFIX
+          value: %%ARCHSUFFIX%%
         securityContext:
           privileged: true
         ports:
         - containerPort: 8080
-      volumes:
-        - name: docker-socket
-          hostPath:
-            path: /var/run/docker.sock
-            type: File
 ---
 kind: Service
 apiVersion: v1
