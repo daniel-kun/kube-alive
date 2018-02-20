@@ -150,17 +150,13 @@ view model =
     let
         podList = (List.map (\n -> { name = n.name, status = n.status, app = n.app, podIP = n.podIP }) model.podList)
     in 
-        div [] [
-            text model.debugText,
-            text model.originHost,
-            div [ style [("width", "100%")] ]
-                [
-                    div [ style [("margin", "5px"), ("backgroundColor", "#962E2E"), ("color", "white"), ("padding", "15px")] ]
-                        (LoadBalancing.view LoadBalancingMsg podList model.loadBalancing),
-                    div [ style [("margin", "5px"), ("backgroundColor", "#473f54"), ("color", "white"), ("padding", "15px")] ]
-                        (SelfHealing.view SelfHealingMsg podList model.selfHealing),
-                    div [ style [("margin", "5px"), ("backgroundColor", "#294f82"), ("color", "white"), ("padding", "15px")] ]
-                        (AutoScaling.view AutoScalingMsg  podList model.autoScaling)
-                ]
-        ]
+        div [ style [("width", "100%")] ]
+            [
+                div [ style [("margin", "5px"), ("backgroundColor", "#962E2E"), ("color", "white"), ("padding", "15px")] ]
+                    (LoadBalancing.view LoadBalancingMsg podList model.loadBalancing),
+                div [ style [("margin", "5px"), ("backgroundColor", "#473f54"), ("color", "white"), ("padding", "15px")] ]
+                    (SelfHealing.view SelfHealingMsg podList model.selfHealing),
+                div [ style [("margin", "5px"), ("backgroundColor", "#294f82"), ("color", "white"), ("padding", "15px")] ]
+                    (AutoScaling.view AutoScalingMsg  podList model.autoScaling)
+            ]
 
