@@ -1,4 +1,5 @@
 module SelfHealing exposing (Model, Msg, init, update, view, subscriptions)
+import String.Format exposing (format1)
 import Html exposing (Html, h1, div, text, button, table, tr, td, span)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
@@ -9,6 +10,7 @@ import Time
 -- MODEL
 
 type alias Model = {
+    originHost: String,
     x: Int,
     healthy: Bool
 }
@@ -29,7 +31,7 @@ type Msg =
 
 -- FUNCTIONS
 
-init = Model 0 True
+init originHost = Model originHost 0 True
 
 renderPod : { name: String, app: String, status: String, podIP: String } -> Html msg
 renderPod pod =
@@ -56,13 +58,13 @@ update makeMsg msg model =
     in
         case msg of
             InfectService ->
-                (model, Http.send (\m -> (makeMsg (ServiceInfectOrKillResponse m))) (Http.post "/healthcheck/infect" Http.emptyBody (string)))
+                (model, Http.send (\m -> (makeMsg (ServiceInfectOrKillResponse m))) (Http.post (format1 "http://{1}/healthcheck/infect" selfHealing.originHost) Http.emptyBody (string)))
             KillService ->
-                (model, Http.send (\m -> (makeMsg (ServiceInfectOrKillResponse m))) (Http.post "/healthcheck/kill" Http.emptyBody (string)))
+                (model, Http.send (\m -> (makeMsg (ServiceInfectOrKillResponse m))) (Http.post (format1 "http://{1}/healthcheck/kill" selfHealing.originHost) Http.emptyBody (string)))
             ServiceInfectOrKillResponse _ ->
                 (model, Cmd.none)
             StatusPollTimer _ ->
-                ({ model | selfHealing = { selfHealing | x = selfHealing.x + 1 }}, (Http.send (\m -> (makeMsg (StatusPollResponse m))) (Http.getString "/healthcheck/")))
+                ({ model | selfHealing = { selfHealing | x = selfHealing.x + 1 }}, (Http.send (\m -> (makeMsg (StatusPollResponse m))) (Http.getString (format1 "http://{1}/healthcheck/" selfHealing.originHost))))
             StatusPollResponse (Ok response) ->
                 ({ model | selfHealing = { selfHealing | healthy = True }}, Cmd.none)
             StatusPollResponse (Err _)->

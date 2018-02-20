@@ -1,4 +1,5 @@
 module LoadBalancing exposing (Model, Msg(ExecLoadBalanceTest, ReceiveLoadBalanceResponse), init, update, view)
+import String.Format exposing (format1)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
@@ -8,7 +9,8 @@ import List.Extra
 -- MODEL
 
 type alias Model =
-    { responses: List String
+    { responses: List String,
+      originHost: String
     }
 
 -- MSG
@@ -23,7 +25,7 @@ type alias Container c = {
 
 -- FUNCTIONS
 
-init = Model []
+init originHost = Model [] originHost
 
 
 renderLoadBalancing : Model -> { name: String, status: String, app: String, podIP: String } -> Html msg
@@ -46,7 +48,7 @@ update : (Msg -> msg) -> Msg -> Container c -> (Container c, Cmd msg)
 update makeMsg msg model =
     case msg of
         ExecLoadBalanceTest ->
-            (model, Cmd.batch (List.repeat 50 (Http.send (\m -> makeMsg (ReceiveLoadBalanceResponse m)) (Http.getString "/getip"))))
+            (model, Cmd.batch (List.repeat 50 (Http.send (\m -> makeMsg (ReceiveLoadBalanceResponse m)) (Http.getString (format1 "http://{1}/getip" model.loadBalancing.originHost)))))
         ReceiveLoadBalanceResponse (Ok response) ->
             let
                 loadBalancing = model.loadBalancing

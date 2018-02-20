@@ -1,7 +1,7 @@
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import String.Format exposing (format2)
+import String.Format exposing (format1, format2)
 import WebSocket
 import Http exposing (get, send)
 import KubernetesApiModel exposing (KubernetesResultMetadata, KubernetesPodResult, KubernetesPodItem, KubernetesPodMetadata, KubernetesLabels, KubernetesPodStatus, KubernetesPodCondition, KubernetesPodUpdate)
@@ -45,7 +45,7 @@ type alias Flags =
 
 init : Flags -> (Model, Cmd Msg)
 init flags =
-  (Model [] flags.originHost "" "(Loading)" LoadBalancing.init SelfHealing.init AutoScaling.init, Http.send PodList (Http.get "/api/v1/namespaces/kube-alive/pods" decodeKubernetesPodResult))
+  (Model [] flags.originHost "" "(Loading)" (LoadBalancing.init flags.originHost) (SelfHealing.init flags.originHost) (AutoScaling.init flags.originHost), Http.send PodList (Http.get (format1 "http://{1}/api/v1/namespaces/kube-alive/pods" flags.originHost) decodeKubernetesPodResult))
 
 -- UPDATE
 
