@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/daniel-kun/kube-alive.svg?branch=master)](https://travis-ci.org/daniel-kun/kube-alive)
+
 # Kubernetes: It's alive!
 
 You can find a dashboard with experiments with Kubernetes (k8s) to observe it's behaviour in real scenarios in this project.
