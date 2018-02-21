@@ -1,4 +1,5 @@
 module SelfHealing exposing (Model, Msg, init, update, view, subscriptions)
+import Base exposing (PodInfo, CommonModel)
 import String.Format exposing (format1)
 import Html exposing (Html, h1, div, text, button, table, tr, td, span)
 import Html.Attributes exposing (style)
@@ -33,22 +34,22 @@ type Msg =
 
 init originHost = Model originHost 0 True
 
-renderPod : { name: String, app: String, status: String, podIP: String } -> Html msg
+renderPod : PodInfo -> Html msg
 renderPod pod =
     tr [] [
         td [] [ text pod.name ],
         td [] [ text pod.status ]
     ]
 
-view : (Msg -> msg) -> List { name: String, app: String, status: String, podIP: String } -> Model -> List (Html msg)
-view makeMsg pods model =
+view : (Msg -> msg) -> CommonModel -> Model -> List (Html msg)
+view makeMsg commonModel model =
     [ div [] [ 
         h1 [] [ text "Experiment 2: Self-Healing" ],
         button [ onClick (makeMsg InfectService) ] [ text "Infect service" ],
         button [ onClick (makeMsg KillService) ] [ text "Kill service" ],
         if (model.healthy) then (span [style [("color", "green")]][text "Service healthy"]) else (span [style [("color", "red")]][text "Service unhealthy"]),
         table [] 
-            (List.map renderPod (List.filter (\n -> n.app == "healthcheck") pods))
+            (List.map renderPod (List.filter (\n -> n.app == "healthcheck") commonModel.podList))
     ] ]
 
 update : (Msg -> msg) -> Msg -> Container c -> (Container c, Cmd msg)

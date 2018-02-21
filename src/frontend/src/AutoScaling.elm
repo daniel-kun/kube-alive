@@ -1,4 +1,5 @@
 module AutoScaling exposing (Model, Msg, init, view, update)
+import Base exposing (PodInfo, CommonModel)
 import Html exposing (Html, h1, text, table, tr, td, button, div)
 import Html.Events exposing (onClick)
 import Http
@@ -29,15 +30,15 @@ type Msg =
 init originHost = Model originHost False 0
 
 
-renderAutoScaling : Model -> { name: String, status: String, app: String, podIP: String } -> Html msg
+renderAutoScaling : Model -> PodInfo -> Html msg
 renderAutoScaling model pod =
     tr [] [
         td [] [text <| pod.name ],
         td [] [text <| pod.status ]
     ]
 
-view : (Msg -> msg) -> List { name: String, status: String, app: String, podIP: String } -> Model -> List (Html msg)
-view makeMsg podList model =
+view : (Msg -> msg) -> CommonModel -> Model -> List (Html msg)
+view makeMsg commonModel model =
     [
         h1 [] [ text "Experiment 3: Auto-Scaling" ],
         if (model.isRunning) then
@@ -47,7 +48,7 @@ view makeMsg podList model =
             ]
         else
             button [ onClick (makeMsg StartLoadGenerator)] [ text "Start load generator" ],
-        table [] (List.map (renderAutoScaling model) (List.filter (\n -> n.app == "cpuhog") podList))
+        table [] (List.map (renderAutoScaling model) (List.filter (\n -> n.app == "cpuhog") commonModel.podList))
     ]
 
 makeLoadGeneratorRequest originHost makeMsg = 
