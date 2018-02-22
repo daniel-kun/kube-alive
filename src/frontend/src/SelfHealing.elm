@@ -47,7 +47,7 @@ view makeMsg commonModel model =
         h1 [] [ text "Experiment 2: Self-Healing" ],
         button [ onClick (makeMsg InfectService) ] [ text "Infect service" ],
         button [ onClick (makeMsg KillService) ] [ text "Kill service" ],
-        if (model.healthy) then (span [style [("color", "green")]][text "Service healthy"]) else (span [style [("color", "red")]][text "Service unhealthy"]),
+        if (model.healthy) then (span [style [("font-weight", "bold"), ("color", "green")]][text "Service healthy"]) else (span [style [("font-weight", "bold"), ("color", "red")]][text "Service unhealthy"]),
         table [] 
             (List.map renderPod (List.filter (\n -> n.app == "healthcheck") commonModel.podList))
     ] ]
