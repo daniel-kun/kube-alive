@@ -11,6 +11,7 @@ import Json.Decode exposing (decodeString)
 import LoadBalancing
 import SelfHealing
 import AutoScaling
+import RollingUpdate
 
 main =
   Html.programWithFlags
@@ -30,6 +31,7 @@ type alias Model =
     , loadBalancing : LoadBalancing.Model
     , selfHealing : SelfHealing.Model
     , autoScaling : AutoScaling.Model
+    , rollingUpdate : RollingUpdate.Model
   }
 
 type alias Flags =
@@ -38,7 +40,7 @@ type alias Flags =
 
 init : Flags -> (Model, Cmd Msg)
 init flags =
-  (Model (CommonModel []) flags.originHost "" "(Loading)" (LoadBalancing.init flags.originHost) (SelfHealing.init flags.originHost) (AutoScaling.init flags.originHost), Http.send PodList (Http.get (format1 "http://{1}/api/v1/namespaces/kube-alive/pods" flags.originHost) decodeKubernetesPodResult))
+  (Model (CommonModel []) flags.originHost "" "(Loading)" (LoadBalancing.init flags.originHost) (SelfHealing.init flags.originHost) (AutoScaling.init flags.originHost) (RollingUpdate.init flags.originHost), Http.send PodList (Http.get (format1 "http://{1}/api/v1/namespaces/kube-alive/pods" flags.originHost) decodeKubernetesPodResult))
 
 -- UPDATE
 
@@ -48,6 +50,7 @@ type Msg =
     | LoadBalancingMsg LoadBalancing.Msg 
     | SelfHealingMsg SelfHealing.Msg
     | AutoScalingMsg AutoScaling.Msg
+    | RollingUpdateMsg RollingUpdate.Msg
 
 makePodInfoStatus : KubernetesPodItem -> String
 makePodInfoStatus item =
@@ -125,6 +128,8 @@ update msg model =
           SelfHealing.update SelfHealingMsg msg model
       AutoScalingMsg msg ->
           AutoScaling.update AutoScalingMsg msg model
+      RollingUpdateMsg msg ->
+          RollingUpdate.update RollingUpdateMsg msg model
 
 -- SUBSCRIPTIONS
 
@@ -136,7 +141,8 @@ subscriptions model =
                 Sub.none
             version ->
                 WebSocket.listen (format2 "ws://{1}/api/v1/namespaces/kube-alive/pods?resourceVersion={2}&watch=true" (model.originHost, model.podListResourceVersion)) PodUpdate),
-        (SelfHealing.subscriptions SelfHealingMsg model)
+        (SelfHealing.subscriptions SelfHealingMsg model),
+        (RollingUpdate.subscriptions RollingUpdateMsg model)
     ]
 
 -- VIEW
@@ -153,6 +159,8 @@ view model =
                 div [ style [("margin", "5px"), ("backgroundColor", "#473f54"), ("color", "white"), ("padding", "15px")] ]
                     (SelfHealing.view SelfHealingMsg model.commonModel model.selfHealing),
                 div [ style [("margin", "5px"), ("backgroundColor", "#294f82"), ("color", "white"), ("padding", "15px")] ]
-                    (AutoScaling.view AutoScalingMsg  model.commonModel model.autoScaling)
+                    (AutoScaling.view AutoScalingMsg  model.commonModel model.autoScaling),
+                div [ style [("margin", "5px"), ("backgroundColor", "#aaaaaa"), ("color", "white"), ("padding", "15px")] ]
+                    (RollingUpdate.view RollingUpdateMsg model.commonModel model.rollingUpdate)
             ]
 
