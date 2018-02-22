@@ -152,15 +152,15 @@ view model =
     let
         podList = (List.map (\n -> { name = n.name, status = n.status, app = n.app, podIP = n.podIP }) model.commonModel.podList)
     in 
-        div [ style [("width", "100%")] ]
+        div [ style [("width", "100%"), ("color", "#550303")] ]
             [
-                div [ style [("margin", "5px"), ("backgroundColor", "#962E2E"), ("color", "white"), ("padding", "15px")] ]
+                div [ style [("margin", "5px"), ("backgroundColor", "#53d88a"), ("padding", "15px")] ]
                     (LoadBalancing.view LoadBalancingMsg model.commonModel model.loadBalancing),
-                div [ style [("margin", "5px"), ("backgroundColor", "#473f54"), ("color", "white"), ("padding", "15px")] ]
+                div [ style [("margin", "5px"), ("backgroundColor", "#fbdb54"), ("padding", "15px")] ]
                     (SelfHealing.view SelfHealingMsg model.commonModel model.selfHealing),
-                div [ style [("margin", "5px"), ("backgroundColor", "#294f82"), ("color", "white"), ("padding", "15px")] ]
+                div [ style [("margin", "5px"), ("backgroundColor", "#999fc7"), ("padding", "15px")] ]
                     (AutoScaling.view AutoScalingMsg  model.commonModel model.autoScaling),
-                div [ style [("margin", "5px"), ("backgroundColor", "#aaaaaa"), ("color", "white"), ("padding", "15px")] ]
+                div [ style [("margin", "5px"), ("backgroundColor", "#fa695b"), ("padding", "15px")] ]
                     (RollingUpdate.view RollingUpdateMsg model.commonModel model.rollingUpdate)
             ]
 
