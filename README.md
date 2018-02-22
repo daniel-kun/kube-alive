@@ -48,5 +48,6 @@ When traffic can not be served with a single Pod and CPU usage exceeds 50%, more
 ![Experiment 3 Demo](docs/demo-experiment-3.gif)
 
 ## Rolling updates
-When a deployment is updated, you see that new Pods are created and then old Pods are killed. (coming soon)
+When a deployment is updated, you see that new Pods are created and then old Pods are killed.
 
+![Experiment 4 Demo](docs/demo-experiment-4.gif)
