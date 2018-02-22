@@ -128,6 +128,16 @@ func getVersionInt() int {
     }
 }
 
+func getNextVersion() int {
+    if getVersionInt() >= 5 {
+        // When reaching version 5, make a round-trip to 1 when an update is requested, because only
+        // 5 container versions are available.
+        return 1
+    } else {
+        return getVersionInt() + 1
+    }
+}
+
 func main() {
     var upgrader = websocket.Upgrader{
         ReadBufferSize:  1024,
@@ -152,7 +162,7 @@ func main() {
             registerChanLock.Lock()
             registerChan = streamCommand(
                     "./deploy.sh",
-                    fmt.Sprintf("%d", getVersionInt() + 1))
+                    fmt.Sprintf("%d", getNextVersion()))
             cleanupChan := make(chan ReceiverNotification, 1)
             registerChan <- RegisterNotification{registerChan: cleanupChan}
             registerChanLock.Unlock()
