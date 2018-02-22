@@ -1,7 +1,8 @@
 import Html exposing (..)
+import Base exposing (PodInfo, CommonModel)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
-import String.Format exposing (format2)
+import String.Format exposing (format1, format2)
 import WebSocket
 import Http exposing (get, send)
 import KubernetesApiModel exposing (KubernetesResultMetadata, KubernetesPodResult, KubernetesPodItem, KubernetesPodMetadata, KubernetesLabels, KubernetesPodStatus, KubernetesPodCondition, KubernetesPodUpdate)
@@ -21,17 +22,9 @@ main =
 
 -- MODEL
 
-type alias PodInfo =
-    { name: String
-    , uid: String
-    , app: String
-    , status: String
-    , podIP: String
-    }
-
 type alias Model =
-  {   podList : List PodInfo
-    , originHost: String
+  {   commonModel : CommonModel
+    , originHost : String
     , podListResourceVersion : String
     , debugText : String
     , loadBalancing : LoadBalancing.Model
@@ -45,7 +38,7 @@ type alias Flags =
 
 init : Flags -> (Model, Cmd Msg)
 init flags =
-  (Model [] flags.originHost "" "(Loading)" LoadBalancing.init SelfHealing.init AutoScaling.init, Http.send PodList (Http.get "/api/v1/namespaces/kube-alive/pods" decodeKubernetesPodResult))
+  (Model (CommonModel []) flags.originHost "" "(Loading)" (LoadBalancing.init flags.originHost) (SelfHealing.init flags.originHost) (AutoScaling.init flags.originHost), Http.send PodList (Http.get (format1 "http://{1}/api/v1/namespaces/kube-alive/pods" flags.originHost) decodeKubernetesPodResult))
 
 -- UPDATE
 
@@ -109,26 +102,29 @@ updatePodList podList podUpdate =
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-  case msg of
-    PodList (Ok newPodList) ->
-        ({ model | debugText = "Loaded.", podList = makePodList newPodList, podListResourceVersion = newPodList.metadata.resourceVersion }, Cmd.none)
-    PodList (Err _) ->
-        ({ model | debugText = "Fetch error" }, Cmd.none)
-    PodUpdate jsonResponse ->
-        let
-            parseResult = (decodeString decodeKubernetesPodUpdate jsonResponse)
-        in 
-            case parseResult of
-                Ok podUpdates ->
-                    ({ model | podList = (updatePodList model.podList podUpdates) }, Cmd.none)
-                Err errorMessage ->
-                    ({ model | debugText = errorMessage }, Cmd.none)
-    LoadBalancingMsg msg ->
-        LoadBalancing.update LoadBalancingMsg msg model
-    SelfHealingMsg msg ->
-        SelfHealing.update SelfHealingMsg msg model
-    AutoScalingMsg msg ->
-        AutoScaling.update AutoScalingMsg msg model
+  let
+    commonModel = model.commonModel
+  in
+    case msg of
+      PodList (Ok newPodList) ->
+          ({ model | debugText = "Loaded.", commonModel = { commonModel | podList = makePodList newPodList }, podListResourceVersion = newPodList.metadata.resourceVersion }, Cmd.none)
+      PodList (Err _) ->
+          ({ model | debugText = "Fetch error" }, Cmd.none)
+      PodUpdate jsonResponse ->
+          let
+              parseResult = (decodeString decodeKubernetesPodUpdate jsonResponse)
+          in 
+              case parseResult of
+                  Ok podUpdates ->
+                      ({ model | commonModel = { commonModel | podList = (updatePodList commonModel.podList podUpdates) } }, Cmd.none)
+                  Err errorMessage ->
+                      ({ model | debugText = errorMessage }, Cmd.none)
+      LoadBalancingMsg msg ->
+          LoadBalancing.update LoadBalancingMsg msg model
+      SelfHealingMsg msg ->
+          SelfHealing.update SelfHealingMsg msg model
+      AutoScalingMsg msg ->
+          AutoScaling.update AutoScalingMsg msg model
 
 -- SUBSCRIPTIONS
 
@@ -148,19 +144,15 @@ subscriptions model =
 view : Model -> Html Msg
 view model =
     let
-        podList = (List.map (\n -> { name = n.name, status = n.status, app = n.app, podIP = n.podIP }) model.podList)
+        podList = (List.map (\n -> { name = n.name, status = n.status, app = n.app, podIP = n.podIP }) model.commonModel.podList)
     in 
-        div [] [
-            text model.debugText,
-            text model.originHost,
-            div [ style [("width", "100%")] ]
-                [
-                    div [ style [("margin", "5px"), ("backgroundColor", "#962E2E"), ("color", "white"), ("padding", "15px")] ]
-                        (LoadBalancing.view LoadBalancingMsg podList model.loadBalancing),
-                    div [ style [("margin", "5px"), ("backgroundColor", "#473f54"), ("color", "white"), ("padding", "15px")] ]
-                        (SelfHealing.view SelfHealingMsg podList model.selfHealing),
-                    div [ style [("margin", "5px"), ("backgroundColor", "#294f82"), ("color", "white"), ("padding", "15px")] ]
-                        (AutoScaling.view AutoScalingMsg  podList model.autoScaling)
-                ]
-        ]
+        div [ style [("width", "100%")] ]
+            [
+                div [ style [("margin", "5px"), ("backgroundColor", "#962E2E"), ("color", "white"), ("padding", "15px")] ]
+                    (LoadBalancing.view LoadBalancingMsg model.commonModel model.loadBalancing),
+                div [ style [("margin", "5px"), ("backgroundColor", "#473f54"), ("color", "white"), ("padding", "15px")] ]
+                    (SelfHealing.view SelfHealingMsg model.commonModel model.selfHealing),
+                div [ style [("margin", "5px"), ("backgroundColor", "#294f82"), ("color", "white"), ("padding", "15px")] ]
+                    (AutoScaling.view AutoScalingMsg  model.commonModel model.autoScaling)
+            ]
 

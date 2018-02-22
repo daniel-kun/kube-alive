@@ -1,4 +1,5 @@
 module AutoScaling exposing (Model, Msg, init, view, update)
+import Base exposing (PodInfo, CommonModel)
 import Html exposing (Html, h1, text, table, tr, td, button, div)
 import Html.Events exposing (onClick)
 import Http
@@ -7,6 +8,7 @@ import String.Format exposing (format1)
 -- MODEL
 
 type alias Model = {
+    originHost: String,
     isRunning: Bool,
     finishedRequests: Int
 }
@@ -25,18 +27,18 @@ type Msg =
 
 -- FUNCTIONS
 
-init = Model False 0
+init originHost = Model originHost False 0
 
 
-renderAutoScaling : Model -> { name: String, status: String, app: String, podIP: String } -> Html msg
+renderAutoScaling : Model -> PodInfo -> Html msg
 renderAutoScaling model pod =
     tr [] [
         td [] [text <| pod.name ],
         td [] [text <| pod.status ]
     ]
 
-view : (Msg -> msg) -> List { name: String, status: String, app: String, podIP: String } -> Model -> List (Html msg)
-view makeMsg podList model =
+view : (Msg -> msg) -> CommonModel -> Model -> List (Html msg)
+view makeMsg commonModel model =
     [
         h1 [] [ text "Experiment 3: Auto-Scaling" ],
         if (model.isRunning) then
@@ -46,17 +48,17 @@ view makeMsg podList model =
             ]
         else
             button [ onClick (makeMsg StartLoadGenerator)] [ text "Start load generator" ],
-        table [] (List.map (renderAutoScaling model) (List.filter (\n -> n.app == "cpuhog") podList))
+        table [] (List.map (renderAutoScaling model) (List.filter (\n -> n.app == "cpuhog") commonModel.podList))
     ]
 
-makeLoadGeneratorRequest makeMsg = 
-        Http.send (\n -> (makeMsg (ContinueLoadGenerator n))) (Http.getString "/cpuhog")
+makeLoadGeneratorRequest originHost makeMsg = 
+        Http.send (\n -> (makeMsg (ContinueLoadGenerator n))) (Http.getString (format1 "http://{1}/cpuhog" originHost))
 
 -- The load generator fires two requests at once, because a single request would only occupy two nodes
-makeLoadGeneratorRequests makeMsg = 
+makeLoadGeneratorRequests originHost makeMsg = 
     Cmd.batch [
-        makeLoadGeneratorRequest makeMsg,
-        makeLoadGeneratorRequest makeMsg
+        makeLoadGeneratorRequest originHost makeMsg,
+        makeLoadGeneratorRequest originHost makeMsg
     ]
 
 update : (Msg -> msg) -> Msg -> Container c -> (Container c, Cmd msg)
@@ -66,12 +68,12 @@ update makeMsg msg model =
     in
         case msg of
             StartLoadGenerator ->
-                ({ model | autoScaling = { autoScaling | isRunning = True } }, makeLoadGeneratorRequests makeMsg)
+                ({ model | autoScaling = { autoScaling | isRunning = True } }, makeLoadGeneratorRequests autoScaling.originHost makeMsg)
             StopLoadGenerator ->
                 ({ model | autoScaling = { autoScaling | isRunning = False, finishedRequests = 0 } }, Cmd.none)
             ContinueLoadGenerator _ ->
                 if (autoScaling.isRunning) then
-                    ({ model | autoScaling = { autoScaling | finishedRequests = autoScaling.finishedRequests + 1 } }, makeLoadGeneratorRequests makeMsg)
+                    ({ model | autoScaling = { autoScaling | finishedRequests = autoScaling.finishedRequests + 1 } }, makeLoadGeneratorRequests autoScaling.originHost makeMsg)
                 else
                     (model, Cmd.none)
 
