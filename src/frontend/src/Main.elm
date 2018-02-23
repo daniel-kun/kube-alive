@@ -249,13 +249,17 @@ renderMain model =
                 (RollingUpdate.view RollingUpdateMsg model.commonModel model.rollingUpdate)
 
 
+renderTabHeader : String -> String -> List (Html Msg)
+renderTabHeader title description =
+    [ div [] [ text title ], div [ style [("font-weight", "bold")] ] [ text description ] ]
+
 renderDrawer : Model -> List (Html Msg)
 renderDrawer model =
     [ Layout.title [] [ text "Experiments:" ]
-    , Layout.navigation [] [ Layout.link [ Options.onClick ToggleTabLoadBalancing ] [ text "Experiment #1" ] ]
-    , Layout.navigation [] [ Layout.link [ Options.onClick ToggleTabSelfHealing ] [ text "Experiment #2" ] ]
-    , Layout.navigation [] [ Layout.link [ Options.onClick ToggleTabAutoScaling ] [ text "Experiment #3" ] ]
-    , Layout.navigation [] [ Layout.link [ Options.onClick ToggleTabRollingUpdates ] [ text "Experiment #4" ] ]
+    , Layout.navigation [] [ Layout.link [ Options.onClick ToggleTabLoadBalancing ] (renderTabHeader "Experiment #1" "Load-Balancing") ]
+    , Layout.navigation [] [ Layout.link [ Options.onClick ToggleTabSelfHealing ] (renderTabHeader "Experiment #2" "Self-Healing") ]
+    , Layout.navigation [] [ Layout.link [ Options.onClick ToggleTabAutoScaling ] (renderTabHeader "Experiment #3" "Auto-Scaling") ]
+    , Layout.navigation [] [ Layout.link [ Options.onClick ToggleTabRollingUpdates ] (renderTabHeader "Experiment #4" "Rolling Updates") ]
     ]
 
 
