@@ -1,4 +1,4 @@
-module KubernetesApiModel exposing (KubernetesResultMetadata, KubernetesPodResult, KubernetesPodItem, KubernetesPodMetadata, KubernetesLabels, KubernetesPodStatus, KubernetesPodCondition, KubernetesPodUpdate)
+module KubernetesApiModel exposing (KubernetesResultMetadata, KubernetesPodResult, KubernetesPodItem, KubernetesPodSpec, KubernetesPodMetadata, KubernetesLabels, KubernetesPodStatus, KubernetesPodCondition, KubernetesPodUpdate, KubernetesContainerItem)
 
 type alias KubernetesResultMetadata = {
     resourceVersion: String
@@ -14,9 +14,15 @@ type alias KubernetesPodResult = {
     items: List KubernetesPodItem
 }
 
+type alias KubernetesPodSpec = {
+    containers: List KubernetesContainerItem,
+    nodeName: String
+}
+
 type alias KubernetesPodItem = {
   metadata: KubernetesPodMetadata,
-  status: KubernetesPodStatus
+  status: KubernetesPodStatus,
+  spec: KubernetesPodSpec
 }
 
 type alias KubernetesPodMetadata = {
@@ -40,5 +46,10 @@ type alias KubernetesPodStatus = {
 type alias KubernetesPodCondition = {
   conditionType: String,
   status: String
+}
+
+type alias KubernetesContainerItem = {
+    name: String,
+    image: String
 }
 

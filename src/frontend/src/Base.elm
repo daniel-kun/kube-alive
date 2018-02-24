@@ -1,4 +1,4 @@
-module Base exposing (PodInfo, CommonModel, renderButtonCell)
+module Base exposing (ContainerInfo, PodInfo, CommonModel, renderButtonCell)
 
 import Material
 import Material.Grid as Grid
@@ -8,12 +8,18 @@ import Html exposing (..)
 
 -- MODEL
 
+type alias ContainerInfo = {
+        name : String,
+        image : String
+    }
+
 type alias PodInfo =
     { name: String
     , uid: String
     , app: String
     , status: String
     , podIP: String
+    , containers : List ContainerInfo
     }
 
 type alias CommonModel = {

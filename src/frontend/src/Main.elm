@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Html exposing (..)
-import Base exposing (PodInfo, CommonModel)
+import Base exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import String.Format exposing (format1, format2)
@@ -101,10 +101,12 @@ makePodIP item =
         Nothing ->
             ""
 
+makeContainerInfo container =
+    ContainerInfo container.name container.image
 
 makePodInfo : KubernetesPodItem -> PodInfo
 makePodInfo item =
-    PodInfo item.metadata.name item.metadata.uid item.metadata.labels.app (makePodInfoStatus item) (makePodIP item)
+    PodInfo item.metadata.name item.metadata.uid item.metadata.labels.app (makePodInfoStatus item) (makePodIP item) (List.map makeContainerInfo item.spec.containers)
 
 
 makePodList : KubernetesPodResult -> List PodInfo

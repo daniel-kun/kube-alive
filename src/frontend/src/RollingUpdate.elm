@@ -4,6 +4,7 @@ import Base exposing (..)
 import String.Format exposing (format1)
 import Html exposing (Html, h1, div, text, button, table, tr, td, span, p)
 import Html.Events exposing (onClick)
+import List.Extra exposing (last)
 import Time
 import Http
 import Material
@@ -12,6 +13,7 @@ import Material.Color as Color
 import Material.Grid as Grid
 import Material.List as Lists
 import Material.Typography as Typo
+import Material.Badge as Badge
 
 
 -- MODEL
@@ -43,12 +45,22 @@ type Msg
 init originHost =
     Model Material.model originHost ""
 
+getPodVersion pod =
+    case pod.containers of
+        c :: _->
+            case last (String.split ":" c.image) of
+                Just a ->
+                    a
+                Nothing ->
+                    ""
+        _ ->
+            ""
 
 renderPod : PodInfo -> Html Msg
 renderPod pod =
     Lists.li [ Lists.withSubtitle ]
         [ Lists.content []
-            [ text (format1 "Pod {1}" pod.name)
+            [ Options.span [ Badge.add (getPodVersion pod) ] [ text (format1 "Pod {1}" pod.name) ]
             , Lists.subtitle [] [ text pod.status ]
             ]
         ]
