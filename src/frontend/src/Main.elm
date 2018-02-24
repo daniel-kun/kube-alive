@@ -61,7 +61,7 @@ type alias Flags =
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
-    ( Model (CommonModel []  Material.model) flags.originHost RollingUpdateTab "" "(Loading)" (LoadBalancing.init flags.originHost) (SelfHealing.init flags.originHost) (AutoScaling.init flags.originHost) (RollingUpdate.init flags.originHost) Material.model, Http.send PodList (Http.get (format1 "http://{1}/api/v1/namespaces/kube-alive/pods" flags.originHost) decodeKubernetesPodResult) )
+    ( Model (CommonModel []  Material.model) flags.originHost LoadBalancingTab "" "(Loading)" (LoadBalancing.init flags.originHost) (SelfHealing.init flags.originHost) (AutoScaling.init flags.originHost) (RollingUpdate.init flags.originHost) Material.model, Http.send PodList (Http.get (format1 "http://{1}/api/v1/namespaces/kube-alive/pods" flags.originHost) decodeKubernetesPodResult) )
 
 
 
@@ -180,8 +180,8 @@ update msg model =
             SelfHealingMsg a ->
                 lift .selfHealing (\m x -> { m | selfHealing = x }) SelfHealingMsg SelfHealing.update a model
 
-            AutoScalingMsg msg ->
-                AutoScaling.update AutoScalingMsg msg model
+            AutoScalingMsg a ->
+                lift .autoScaling (\m x -> { m | autoScaling = x }) AutoScalingMsg AutoScaling.update a model
 
             RollingUpdateMsg a ->
                 lift .rollingUpdate (\m x -> { m | rollingUpdate = x }) RollingUpdateMsg RollingUpdate.update a model
@@ -242,8 +242,8 @@ renderMain model =
                 (List.map (Html.map SelfHealingMsg) (SelfHealing.view model.commonModel model.selfHealing))
 
         AutoScalingTab ->
-            div [ style [ ( "margin", "20px" ), ( "backgroundColor", "#999fc7" ), ( "padding", "15px" ) ] ]
-                (AutoScaling.view AutoScalingMsg model.commonModel model.autoScaling)
+            div [ style [ ( "margin", "20px" ), ( "padding", "15px" ) ] ]
+                (List.map (Html.map AutoScalingMsg) (AutoScaling.view model.commonModel model.autoScaling))
 
         RollingUpdateTab ->
             div [ style [ ( "margin", "20px" ), ( "padding", "15px" ) ] ]
