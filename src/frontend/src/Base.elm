@@ -1,5 +1,7 @@
 module Base exposing (PodInfo, CommonModel)
 
+import Material
+
 -- MODEL
 
 type alias PodInfo =
@@ -12,6 +14,7 @@ type alias PodInfo =
 
 type alias CommonModel = {
     podList: List PodInfo
+    , mdl : Material.Model
 }
 
 -- INIT

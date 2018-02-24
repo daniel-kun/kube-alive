@@ -15,9 +15,9 @@ import SelfHealing
 import AutoScaling
 import RollingUpdate
 import Material
-import Material.Scheme
 import Material.Layout as Layout
 import Material.Options as Options exposing (css)
+import Material.Helpers exposing (lift)
 
 
 main =
@@ -61,7 +61,7 @@ type alias Flags =
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
-    ( Model (CommonModel []) flags.originHost LoadBalancingTab "" "(Loading)" (LoadBalancing.init flags.originHost) (SelfHealing.init flags.originHost) (AutoScaling.init flags.originHost) (RollingUpdate.init flags.originHost) Material.model, Http.send PodList (Http.get (format1 "http://{1}/api/v1/namespaces/kube-alive/pods" flags.originHost) decodeKubernetesPodResult) )
+    ( Model (CommonModel []  Material.model) flags.originHost LoadBalancingTab "" "(Loading)" (LoadBalancing.init flags.originHost) (SelfHealing.init flags.originHost) (AutoScaling.init flags.originHost) (RollingUpdate.init flags.originHost) Material.model, Http.send PodList (Http.get (format1 "http://{1}/api/v1/namespaces/kube-alive/pods" flags.originHost) decodeKubernetesPodResult) )
 
 
 
@@ -174,11 +174,11 @@ update msg model =
                         Err errorMessage ->
                             ( { model | debugText = errorMessage }, Cmd.none )
 
-            LoadBalancingMsg msg ->
-                LoadBalancing.update LoadBalancingMsg msg model
+            LoadBalancingMsg a ->
+                lift .loadBalancing (\m x -> { m | loadBalancing = x }) LoadBalancingMsg LoadBalancing.update a model
 
-            SelfHealingMsg msg ->
-                SelfHealing.update SelfHealingMsg msg model
+            SelfHealingMsg a ->
+                SelfHealing.update SelfHealingMsg a model
 
             AutoScalingMsg msg ->
                 AutoScaling.update AutoScalingMsg msg model
@@ -218,6 +218,7 @@ subscriptions model =
           )
         , (SelfHealing.subscriptions SelfHealingMsg model)
         , (RollingUpdate.subscriptions RollingUpdateMsg model)
+--        , (Material.subscriptions Mdl model)
         ]
 
 
@@ -233,8 +234,8 @@ renderMain : Model -> Html Msg
 renderMain model =
     case model.activeTab of
         LoadBalancingTab ->
-            div [ style [ ( "margin", "20px" ), ( "backgroundColor", "#53d88a" ), ( "padding", "15px" ) ] ]
-                (LoadBalancing.view LoadBalancingMsg model.commonModel model.loadBalancing)
+            div [ style [ ( "margin", "20px" ), ("padding", "15px" ) ] ] 
+                (List.map (Html.map LoadBalancingMsg) (LoadBalancing.view model.commonModel model.loadBalancing))
 
         SelfHealingTab ->
             div [ style [ ( "margin", "20px" ), ( "backgroundColor", "#fbdb54" ), ( "padding", "15px" ) ] ]
@@ -266,7 +267,7 @@ renderDrawer model =
 view : Model -> Html Msg
 view model =
     Layout.render Mdl
-        model.mdl
+        model.commonModel.mdl
         [ Layout.fixedHeader
         , Layout.fixedDrawer
         ]
