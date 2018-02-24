@@ -56,7 +56,7 @@ renderLoadBalancing loadBalancing pod =
 
 view : CommonModel -> Model -> List (Html Msg)
 view commonModel loadBalancing =
-    [ Options.styled h1 [ Color.text Color.primary ] [ text "Experiment 1: Load-Balancing" ]
+    [ Options.styled h1 [ Color.text Color.primary ] [ text "Experiment #1: Load-Balancing" ]
     , Options.styled p
         [ Typo.body1 ]
         [ text "In this experiment, you can make requests to a load-balanced service backed by multiple, stateless instances. Press the button below and observe how the requests are balanced between the Pods." ]

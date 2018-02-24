@@ -68,7 +68,7 @@ renderServiceState healthy =
 
 view : CommonModel -> Model -> List (Html Msg)
 view commonModel model =
-    [ Options.styled h1 [ Color.text Color.primary ] [ text "Experiment 2: Self-Healing" ]
+    [ Options.styled h1 [ Color.text Color.primary ] [ text "Experiment #2: Self-Healing" ]
     , Options.styled p
         [ Typo.body1 ]
         [ text "In this experiment, you can observe how services recover from two different kinds of failures. When you infect the service, it continues running, but returns a 500 error code. When you kill it, the server process terminates (segmentation fault). In both cases, you can see that Kubernetes recovers your service quickly." ]

@@ -61,7 +61,7 @@ type alias Flags =
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
-    ( Model (CommonModel []  Material.model) flags.originHost SelfHealingTab "" "(Loading)" (LoadBalancing.init flags.originHost) (SelfHealing.init flags.originHost) (AutoScaling.init flags.originHost) (RollingUpdate.init flags.originHost) Material.model, Http.send PodList (Http.get (format1 "http://{1}/api/v1/namespaces/kube-alive/pods" flags.originHost) decodeKubernetesPodResult) )
+    ( Model (CommonModel []  Material.model) flags.originHost RollingUpdateTab "" "(Loading)" (LoadBalancing.init flags.originHost) (SelfHealing.init flags.originHost) (AutoScaling.init flags.originHost) (RollingUpdate.init flags.originHost) Material.model, Http.send PodList (Http.get (format1 "http://{1}/api/v1/namespaces/kube-alive/pods" flags.originHost) decodeKubernetesPodResult) )
 
 
 
@@ -183,8 +183,8 @@ update msg model =
             AutoScalingMsg msg ->
                 AutoScaling.update AutoScalingMsg msg model
 
-            RollingUpdateMsg msg ->
-                RollingUpdate.update RollingUpdateMsg msg model
+            RollingUpdateMsg a ->
+                lift .rollingUpdate (\m x -> { m | rollingUpdate = x }) RollingUpdateMsg RollingUpdate.update a model
 
             Mdl msg ->
                 Material.update Mdl msg model
@@ -217,7 +217,7 @@ subscriptions model =
                 WebSocket.listen (format2 "ws://{1}/api/v1/namespaces/kube-alive/pods?resourceVersion={2}&watch=true" ( model.originHost, model.podListResourceVersion )) PodUpdate
           )
         , SelfHealing.subscriptions SelfHealingMsg model.selfHealing
-        , (RollingUpdate.subscriptions RollingUpdateMsg model)
+        , (RollingUpdate.subscriptions RollingUpdateMsg model.rollingUpdate)
 --        , (Material.subscriptions Mdl model)
         ]
 
@@ -246,8 +246,8 @@ renderMain model =
                 (AutoScaling.view AutoScalingMsg model.commonModel model.autoScaling)
 
         RollingUpdateTab ->
-            div [ style [ ( "margin", "20px" ), ( "backgroundColor", "#fa695b" ), ( "padding", "15px" ) ] ]
-                (RollingUpdate.view RollingUpdateMsg model.commonModel model.rollingUpdate)
+            div [ style [ ( "margin", "20px" ), ( "padding", "15px" ) ] ]
+                (List.map (Html.map RollingUpdateMsg) (RollingUpdate.view model.commonModel model.rollingUpdate))
 
 
 renderTabHeader : String -> String -> List (Html Msg)
@@ -258,8 +258,8 @@ renderDrawer : Model -> List (Html Msg)
 renderDrawer model =
     [ Layout.navigation [] [ Layout.link [ Options.onClick ToggleTabLoadBalancing ] (renderTabHeader "Experiment #1" "Load-Balancing") ]
     , Layout.navigation [] [ Layout.link [ Options.onClick ToggleTabSelfHealing ] (renderTabHeader "Experiment #2" "Self-Healing") ]
-    , Layout.navigation [] [ Layout.link [ Options.onClick ToggleTabAutoScaling ] (renderTabHeader "Experiment #3" "Auto-Scaling") ]
-    , Layout.navigation [] [ Layout.link [ Options.onClick ToggleTabRollingUpdates ] (renderTabHeader "Experiment #4" "Rolling Updates") ]
+    , Layout.navigation [] [ Layout.link [ Options.onClick ToggleTabRollingUpdates ] (renderTabHeader "Experiment #3" "Rolling Updates") ]
+    , Layout.navigation [] [ Layout.link [ Options.onClick ToggleTabAutoScaling ] (renderTabHeader "Experiment #4" "Auto-Scaling") ]
     ]
 
 

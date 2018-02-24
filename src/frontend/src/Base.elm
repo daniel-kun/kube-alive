@@ -25,7 +25,7 @@ type alias CommonModel = {
 
 
 renderButtonCell index model makeMdl msg actionText =
-    Grid.cell [ Grid.size Grid.All 3 ] [ 
+    Grid.cell [ Grid.size Grid.All index ] [ 
         Button.render makeMdl [ index ] model.mdl [ Button.raised, Button.colored, Button.ripple, Options.onClick msg ] [ text actionText ]
     ]
 
