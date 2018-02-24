@@ -1,6 +1,6 @@
 module SelfHealing exposing (Model, Msg, init, update, view, subscriptions)
 
-import Base exposing (PodInfo, CommonModel)
+import Base exposing (..)
 import String.Format exposing (format1)
 import Html exposing (Html, h1, div, text, button, table, tr, td, span, p)
 import Html.Attributes exposing (style)
@@ -66,20 +66,15 @@ renderServiceState healthy =
     else
         Options.styled p [ Typo.subhead, css "font-weight" "bold", css "color" "red" ] [ text "Service unhealthy" ]
 
-
-renderButton index model msg actionText =
-    Button.render Mdl [ index ] model.mdl [ Button.raised, Button.colored, Button.ripple, Options.onClick msg ] [ text actionText ]
-
-
 view : CommonModel -> Model -> List (Html Msg)
 view commonModel model =
     [ Options.styled h1 [ Color.text Color.primary ] [ text "Experiment 2: Self-Healing" ]
     , Options.styled p
         [ Typo.body1 ]
         [ text "In this experiment, you can observe how services recover from two different kinds of failures. When you infect the service, it continues running, but returns a 500 error code. When you kill it, the server process terminates (segmentation fault). In both cases, you can see that Kubernetes recovers your service quickly." ]
-    , Grid.grid []
-        [ Grid.cell [ Grid.size Grid.All 2 ] [ renderButton 1 model InfectService "Infect service" ]
-        , Grid.cell [ Grid.size Grid.All 2 ] [ renderButton 2 model KillService "Kill service" ]
+    , Grid.grid [] [
+          renderButtonCell 1 model Mdl InfectService "Infect service"
+        , renderButtonCell 2 model Mdl KillService "Kill service"
         , Grid.cell [ Grid.size Grid.All 4 ] [ renderServiceState model.healthy ]
         ]
     , Options.styled p [ Typo.subhead ] [ text "Pod details:" ]

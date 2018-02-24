@@ -1,6 +1,6 @@
 module LoadBalancing exposing (Model, Msg(ExecLoadBalanceTest, ReceiveLoadBalanceResponse), init, update, view)
 
-import Base exposing (PodInfo, CommonModel)
+import Base exposing (..)
 import String.Format exposing (format1)
 import Html exposing (..)
 import Html.Attributes exposing (..)
@@ -15,6 +15,7 @@ import Material.Button as Button
 import Material.List as Lists
 import Material.Badge as Badge
 import Material.Typography as Typo
+import Material.Grid as Grid
 
 
 -- MODEL
@@ -59,7 +60,9 @@ view commonModel loadBalancing =
     , Options.styled p
         [ Typo.body1 ]
         [ text "In this experiment, you can make requests to a load-balanced service backed by multiple, stateless instances. Press the button below and observe how the requests are balanced between the Pods." ]
-    , Button.render Mdl [ 0 ] loadBalancing.mdl [ Button.raised, Button.colored, Button.ripple, Options.onClick ExecLoadBalanceTest ] [ text "Make 50 requests" ]
+    , Grid.grid [] [
+            renderButtonCell 0 loadBalancing Mdl ExecLoadBalanceTest "Make 50 requests"
+        ]
     , Options.styled p [ Typo.subhead ] [ text "Pod details:" ]
     , Lists.ul [] (List.map (renderLoadBalancing loadBalancing) (List.filter (\n -> n.app == "getip") commonModel.podList))
     ]
