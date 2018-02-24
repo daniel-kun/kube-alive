@@ -21,9 +21,9 @@ import Material.Typography as Typo
 
 
 type alias Model =
-    { responses : List String
+    { mdl : Material.Model
+    , responses : List String
     , originHost : String
-    , mdl : Material.Model
     }
 
 
@@ -42,13 +42,13 @@ type Msg
 
 
 init originHost =
-    Model [] originHost Material.model
+    Model Material.model [] originHost
 
 
 renderLoadBalancing : Model -> PodInfo -> Html msg
 renderLoadBalancing loadBalancing pod =
     Lists.li [ Lists.withSubtitle ]
-        [ Lists.content [] [ text pod.name, Lists.subtitle [] [ text pod.status ] ]
+        [ Lists.content [] [ text (format1 "Pod {1}" pod.name), Lists.subtitle [] [ text pod.status ] ]
         , Lists.content2 [] [ Options.span [ Badge.add (toString (List.Extra.count (\n -> n == pod.podIP) loadBalancing.responses)) ] [ text "Responses" ] ]
         ]
 
@@ -59,7 +59,8 @@ view commonModel loadBalancing =
     , Options.styled p
         [ Typo.body1 ]
         [ text "In this experiment, you can make requests to a load-balanced service backed by multiple, stateless instances. Press the button below and observe how the requests are balanced between the Pods." ]
-    , Button.render Mdl [ 0 ] commonModel.mdl [ Button.raised, Button.colored, Button.ripple, Options.onClick ExecLoadBalanceTest ] [ text "Make 50 requests" ]
+    , Button.render Mdl [ 0 ] loadBalancing.mdl [ Button.raised, Button.colored, Button.ripple, Options.onClick ExecLoadBalanceTest ] [ text "Make 50 requests" ]
+    , Options.styled p [ Typo.subhead ] [ text "Pod details:" ]
     , Lists.ul [] (List.map (renderLoadBalancing loadBalancing) (List.filter (\n -> n.app == "getip") commonModel.podList))
     ]
 
@@ -78,4 +79,3 @@ update msg model =
 
         Mdl msg_ ->
             Material.update Mdl msg_ model
-
