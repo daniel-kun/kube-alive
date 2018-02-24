@@ -8,7 +8,7 @@ import List.Extra exposing (last)
 import Time
 import Http
 import Material
-import Material.Options as Options
+import Material.Options as Options exposing (css)
 import Material.Color as Color
 import Material.Grid as Grid
 import Material.List as Lists
@@ -23,6 +23,7 @@ type alias Model =
     { mdl : Material.Model
     , originHost : String
     , version : String
+    , failedRequests : Int
     }
 
 
@@ -43,7 +44,7 @@ type Msg
 
 
 init originHost =
-    Model Material.model originHost ""
+    Model Material.model originHost "" 0
 
 getPodVersion pod =
     case pod.containers of
@@ -65,16 +66,24 @@ renderPod pod =
             ]
         ]
 
+failColor : Model -> List (Options.Property c m)
+failColor rollingUpdate =
+    if rollingUpdate.failedRequests > 0 then
+        [ css "color" "red", css "font-weight" "bold" ]
+    else
+        []
+
 
 view : CommonModel -> Model -> List (Html Msg)
 view commonModel rollingUpdate =
     [ Options.styled h1 [ Color.text Color.primary ] [ text "Experiment #3: Rolling Updates" ]
     , Options.styled p
         [ Typo.body1 ]
-        [ text "In this experiment, you can observe how a stateless service is updated to a new version, without interrupting the service's availability. The new and the old service will run in parallel until the new service is ready and the old service is killed. At no time should requests fail." ]
+        [ text "In this experiment, you can observe how a stateless service is updated to a new version, without interrupting the service's availability. The new and the old instance will run in parallel until the new instance is ready, then the old instance is killed. The service is polled two times per second for it's current version. At no time should these requests fail." ]
     , Grid.grid []
         [ renderButtonCell 4 rollingUpdate Mdl StartServiceUpdate "Update service"
         , Grid.cell [ Grid.size Grid.All 4 ] [ Options.styled p [ Typo.subhead ] [ text (format1 "Current version: {1}" rollingUpdate.version) ] ]
+        , Grid.cell [ Grid.size Grid.All 4 ] [ Options.styled p ([ Typo.subhead ] ++ (failColor rollingUpdate)) [ text (format1 "Failed requests: {1}" (toString rollingUpdate.failedRequests)) ] ]
         ]
     , Lists.ul []
         (List.map renderPod (List.filter (\n -> n.app == "incver") commonModel.podList))
@@ -85,7 +94,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         StartServiceUpdate ->
-            ( model, (Http.send (\m -> StartServiceResponse m) (Http.getString (format1 "http://{1}/incver/start" model.originHost))) )
+            ( { model | failedRequests = 0 }, (Http.send (\m -> StartServiceResponse m) (Http.getString (format1 "http://{1}/incver/start" model.originHost))) )
 
         StartServiceResponse (Ok _) ->
             ( model, Cmd.none )
@@ -97,7 +106,7 @@ update msg model =
             ( { model | version = version }, Cmd.none )
 
         ReceiveVersionResponse (Err _) ->
-            ( model, Cmd.none )
+            ( { model | failedRequests = model.failedRequests + 1 }, Cmd.none )
 
         VersionPollTimer _ ->
             ( model, (Http.send (\m -> ReceiveVersionResponse m) (Http.getString (format1 "http://{1}/incver/version" model.originHost))) )
