@@ -18,7 +18,6 @@ type alias PodInfo =
 
 type alias CommonModel = {
     podList: List PodInfo
-    , mdl : Material.Model
 }
 
 -- FUNCTIONS

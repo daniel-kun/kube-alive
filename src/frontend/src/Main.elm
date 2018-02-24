@@ -61,7 +61,7 @@ type alias Flags =
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
-    ( Model (CommonModel []  Material.model) flags.originHost LoadBalancingTab "" "(Loading)" (LoadBalancing.init flags.originHost) (SelfHealing.init flags.originHost) (AutoScaling.init flags.originHost) (RollingUpdate.init flags.originHost) Material.model, Http.send PodList (Http.get (format1 "http://{1}/api/v1/namespaces/kube-alive/pods" flags.originHost) decodeKubernetesPodResult) )
+    ( Model (CommonModel []) flags.originHost LoadBalancingTab "" "(Loading)" (LoadBalancing.init flags.originHost) (SelfHealing.init flags.originHost) (AutoScaling.init flags.originHost) (RollingUpdate.init flags.originHost) Material.model, Http.send PodList (Http.get (format1 "http://{1}/api/v1/namespaces/kube-alive/pods" flags.originHost) decodeKubernetesPodResult) )
 
 
 
@@ -217,8 +217,8 @@ subscriptions model =
                 WebSocket.listen (format2 "ws://{1}/api/v1/namespaces/kube-alive/pods?resourceVersion={2}&watch=true" ( model.originHost, model.podListResourceVersion )) PodUpdate
           )
         , SelfHealing.subscriptions SelfHealingMsg model.selfHealing
-        , (RollingUpdate.subscriptions RollingUpdateMsg model.rollingUpdate)
---        , (Material.subscriptions Mdl model)
+        , RollingUpdate.subscriptions RollingUpdateMsg model.rollingUpdate
+        , Material.subscriptions Mdl model
         ]
 
 
@@ -266,7 +266,7 @@ renderDrawer model =
 view : Model -> Html Msg
 view model =
     Layout.render Mdl
-        model.commonModel.mdl
+        model.mdl
         [ Layout.fixedHeader
         , Layout.fixedDrawer
         ]
