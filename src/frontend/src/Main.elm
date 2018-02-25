@@ -147,7 +147,7 @@ makePodList newPodList =
 updatePodInfo : KubernetesPodUpdate -> PodInfo -> PodInfo
 updatePodInfo podUpdate podInfo =
     if podUpdate.object.metadata.uid == podInfo.uid then
-        { podInfo | status = makePodInfoStatus podUpdate.object }
+        makePodInfo podUpdate.object
     else
         podInfo
 
