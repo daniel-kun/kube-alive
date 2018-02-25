@@ -35,12 +35,12 @@ type Msg =
 init originHost = Model Material.model originHost False 0
 
 
-renderAutoScaling : Model -> PodInfo -> Html Msg
-renderAutoScaling model pod =
+renderPod : Model -> CommonModel -> PodInfo -> Html Msg
+renderPod model commonModel pod =
     Lists.li [ Lists.withSubtitle ] [
         Lists.content [] [
             text (format1 "Pod {1}" pod.name),
-            Lists.subtitle [] [ text pod.status ]
+            Lists.subtitle [] [ text (getPodState pod commonModel) ]
             ]
         ]
 
@@ -64,7 +64,7 @@ view commonModel model =
         [ text "In this experiment, you can hammer requests to the service and see how Kubernetes allocates new Pods, potentially on different nodes, to serve the requests faster." ]
     , Grid.grid [] 
           (renderButtons model)
-        , (Lists.ul [] (List.map (renderAutoScaling model) (List.filter (\n -> n.app == "cpuhog") commonModel.podList)))
+        , (Lists.ul [] (List.map (renderPod model commonModel) (List.filter (\n -> n.app == "cpuhog") commonModel.podList)))
     ]
 
 makeLoadGeneratorRequest originHost = 

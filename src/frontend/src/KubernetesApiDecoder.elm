@@ -51,7 +51,7 @@ decodeKubernetesPodSpec : Decoder KubernetesPodSpec
 decodeKubernetesPodSpec =
     (Json.Decode.map2 KubernetesPodSpec
         (field "containers" (Json.Decode.list decodeKubernetesContainerItem))
-        (field "nodeName" string))
+        (maybe (field "nodeName" string)))
 
 decodeKubernetesPodItem : Decoder KubernetesPodItem
 decodeKubernetesPodItem =

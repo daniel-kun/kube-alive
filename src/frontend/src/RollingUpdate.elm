@@ -58,13 +58,14 @@ getPodVersion pod =
         _ ->
             ""
 
-renderPod : PodInfo -> Html Msg
-renderPod pod =
+renderPod : CommonModel -> PodInfo -> Html Msg
+renderPod commonModel pod =
     Lists.li [ Lists.withSubtitle ]
         [ Lists.content []
-            [ Options.span [ Badge.add (getPodVersion pod) ] [ text (format1 "Pod {1}" pod.name) ]
-            , Lists.subtitle [] [ text pod.status ]
-            ]
+            [ text (format1 "Pod {1}" pod.name)
+            , Lists.subtitle [] [ text (getPodState pod commonModel) ]
+            ],
+            Lists.content2 [] [ renderBadge "Version " (getPodVersion pod) ]
         ]
 
 failColor : Model -> List (Options.Property c m)
@@ -83,11 +84,11 @@ view commonModel rollingUpdate =
         [ text "In this experiment, you can observe how a stateless service is updated to a new version, without interrupting the service's availability. The new and the old instance will run in parallel until the new instance is ready, then the old instance is killed. The service is polled two times per second for it's current version. At no time should these requests fail." ]
     , Grid.grid []
         [ renderButtonCell 4 rollingUpdate Mdl StartServiceUpdate "Update service"
-        , Grid.cell [ Grid.size Grid.All 4 ] [ Options.styled p [ Typo.subhead ] [ text (format1 "Current version: {1}" rollingUpdate.version) ] ]
+        , Grid.cell [ Grid.size Grid.All 4 ] [ Options.styled p [ Typo.subhead ] [ text (format1 "Current version: v{1}" rollingUpdate.version) ] ]
         , Grid.cell [ Grid.size Grid.All 4 ] [ Options.styled p ([ Typo.subhead ] ++ (failColor rollingUpdate)) [ text (format1 "Failed requests: {1}" (toString rollingUpdate.failedRequests)) ] ]
         ]
     , Lists.ul []
-        (List.map renderPod (List.filter (\n -> n.app == "incver") commonModel.podList))
+        (List.map (renderPod commonModel) (List.filter (\n -> n.app == "incver") commonModel.podList))
     ]
 
 

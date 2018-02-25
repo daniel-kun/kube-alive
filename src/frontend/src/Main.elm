@@ -2,6 +2,8 @@ module Main exposing (..)
 
 import Html exposing (..)
 import Base exposing (..)
+import Task
+import Date
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import String.Format exposing (format1, format2)
@@ -64,7 +66,7 @@ type alias Flags =
 
 init : Flags -> ( Model, Cmd Msg )
 init flags =
-    ( Model (CommonModel []) flags.originHost LoadBalancingTab "" "(Loading)" (LoadBalancing.init flags.originHost) (SelfHealing.init flags.originHost) (AutoScaling.init flags.originHost) (RollingUpdate.init flags.originHost) Material.model, Http.send PodList (Http.get (format1 "http://{1}/api/v1/namespaces/kube-alive/pods" flags.originHost) decodeKubernetesPodResult) )
+    ( Model (CommonModel [] Nothing) flags.originHost LoadBalancingTab "" "(Loading)" (LoadBalancing.init flags.originHost) (SelfHealing.init flags.originHost) (AutoScaling.init flags.originHost) (RollingUpdate.init flags.originHost) Material.model, Http.send PodList (Http.get (format1 "http://{1}/api/v1/namespaces/kube-alive/pods" flags.originHost) decodeKubernetesPodResult) )
 
 
 
@@ -79,6 +81,7 @@ type Msg
     | AutoScalingMsg AutoScaling.Msg
     | RollingUpdateMsg RollingUpdate.Msg
     | Mdl (Material.Msg Msg)
+    | ReceiveNow Date.Date
     | ToggleTabLoadBalancing
     | ToggleTabSelfHealing
     | ToggleTabAutoScaling
@@ -181,6 +184,8 @@ updatePodList podList podUpdate =
             podList
 
 
+updateNow = Task.perform ReceiveNow Date.now 
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
@@ -189,10 +194,10 @@ update msg model =
     in
         case msg of
             PodList (Ok newPodList) ->
-                ( { model | debugText = "Loaded.", commonModel = { commonModel | podList = makePodList newPodList }, podListResourceVersion = newPodList.metadata.resourceVersion }, Cmd.none )
+                ( { model | debugText = "Loaded.", commonModel = { commonModel | podList = makePodList newPodList }, podListResourceVersion = newPodList.metadata.resourceVersion }, updateNow )
 
             PodList (Err err) ->
-                ( { model | debugText = (format1 "Fetch error: {1}" err) }, Cmd.none )
+                ( { model | debugText = (format1 "Fetch error: {1}" err) }, updateNow )
 
             PodUpdate jsonResponse ->
                 let
@@ -201,10 +206,10 @@ update msg model =
                 in
                     case parseResult of
                         Ok podUpdates ->
-                            ( { model | commonModel = { commonModel | podList = (updatePodList commonModel.podList podUpdates) } }, Cmd.none )
+                            ( { model | commonModel = { commonModel | podList = (updatePodList commonModel.podList podUpdates) } }, updateNow )
 
                         Err errorMessage ->
-                            ( { model | debugText = errorMessage }, Cmd.none )
+                            ( { model | debugText = errorMessage }, updateNow )
 
             LoadBalancingMsg a ->
                 lift .loadBalancing (\m x -> { m | loadBalancing = x }) LoadBalancingMsg LoadBalancing.update a model
@@ -221,17 +226,20 @@ update msg model =
             Mdl msg ->
                 Material.update Mdl msg model
 
+            ReceiveNow now ->
+                ( { model | commonModel = { commonModel | now = Just now } }, Cmd.none )
+
             ToggleTabLoadBalancing ->
-                ( { model | activeTab = LoadBalancingTab }, Cmd.none )
+                ( { model | activeTab = LoadBalancingTab }, updateNow )
 
             ToggleTabSelfHealing ->
-                ( { model | activeTab = SelfHealingTab }, Cmd.none )
+                ( { model | activeTab = SelfHealingTab }, updateNow )
 
             ToggleTabAutoScaling ->
-                ( { model | activeTab = AutoScalingTab }, Cmd.none )
+                ( { model | activeTab = AutoScalingTab }, updateNow )
 
             ToggleTabRollingUpdates ->
-                ( { model | activeTab = RollingUpdateTab }, Cmd.none )
+                ( { model | activeTab = RollingUpdateTab }, updateNow )
 
 
 

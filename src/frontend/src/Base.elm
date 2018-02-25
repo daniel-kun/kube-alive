@@ -1,5 +1,8 @@
-module Base exposing (ContainerInfo, PodInfo, CommonModel, ContainerStatusInfo, ContainerState (Running, Failed), renderButtonCell, renderBadge)
+module Base exposing (ContainerInfo, PodInfo, CommonModel, ContainerStatusInfo, ContainerState (Running, Failed), renderButtonCell, renderBadge, getPodState)
 
+import String.Format exposing (format1, format2)
+import Date
+import Date.Distance as Distance
 import Material
 import Material.Grid as Grid
 import Material.Button as Button
@@ -35,7 +38,8 @@ type alias PodInfo =
     }
 
 type alias CommonModel = {
-    podList: List PodInfo
+    podList: List PodInfo,
+    now : Maybe Date.Date
 }
 
 -- FUNCTIONS
@@ -48,4 +52,19 @@ renderButtonCell index model makeMdl msg actionText =
 
 renderBadge message badge =
     Options.span [ Badge.add badge ] [ text message ]
+
+getPodState pod commonModel =
+    case pod.containerStatus.state of
+        Running started ->
+            format1 "Running since {1}" (case Date.fromString started of
+                Ok d ->
+                    (case commonModel.now of
+                        Just now ->
+                            (Distance.inWords now d)
+                        Nothing ->
+                            started)
+                Err _ ->
+                    started)
+        Failed _ reason message ->
+            format2 "Not running. {1}: {2}" (reason, message)
 

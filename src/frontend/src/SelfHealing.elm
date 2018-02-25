@@ -50,16 +50,12 @@ init originHost =
     Model Material.model originHost False Nothing
 
 
-renderPod : PodInfo -> Html msg
-renderPod pod =
+renderPod : CommonModel -> PodInfo -> Html msg
+renderPod commonModel pod =
     Lists.li [ Lists.withSubtitle ]
         [ Lists.content []
             [ text (format1 "Pod {1}" pod.name),
-            case pod.containerStatus.state of
-                Running started ->
-                    Lists.subtitle [] [ text (format1 "Running since {1}" started)]
-                Failed _ reason message ->
-                    Lists.subtitle [] [ text (format2 "Not running. {1}: {2}" (reason, message))]
+              Lists.subtitle [] [ text (getPodState pod commonModel) ]
             ],
           Lists.content2 []
               [
@@ -89,7 +85,7 @@ view commonModel model =
         ]
     , Options.styled p [ Typo.subhead ] [ text "Pod details:" ]
     , Lists.ul []
-        (List.map renderPod (List.filter (\n -> n.app == "healthcheck") commonModel.podList))
+        (List.map (renderPod commonModel) (List.filter (\n -> n.app == "healthcheck") commonModel.podList))
     ]
 
 

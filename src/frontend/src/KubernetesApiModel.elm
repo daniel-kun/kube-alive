@@ -16,7 +16,7 @@ type alias KubernetesPodResult = {
 
 type alias KubernetesPodSpec = {
     containers: List KubernetesContainerItem,
-    nodeName: String
+    nodeName: Maybe String
 }
 
 type alias KubernetesPodItem = {

@@ -46,10 +46,10 @@ init originHost =
     Model Material.model [] originHost
 
 
-renderLoadBalancing : Model -> PodInfo -> Html msg
-renderLoadBalancing loadBalancing pod =
+renderPod : Model -> CommonModel -> PodInfo -> Html msg
+renderPod loadBalancing commonModel pod =
     Lists.li [ Lists.withSubtitle ]
-        [ Lists.content [] [ text (format1 "Pod {1}" pod.name), Lists.subtitle [] [ text pod.status ] ]
+        [ Lists.content [] [ text (format1 "Pod {1}" pod.name), Lists.subtitle [] [ text (getPodState pod commonModel)] ]
         , Lists.content2 [] [ renderBadge "Responses" (toString (List.Extra.count (\n -> n == pod.podIP) loadBalancing.responses)) ]
         ]
 
@@ -64,7 +64,7 @@ view commonModel loadBalancing =
             renderButtonCell 0 loadBalancing Mdl ExecLoadBalanceTest "Make 50 requests"
         ]
     , Options.styled p [ Typo.subhead ] [ text "Pod details:" ]
-    , Lists.ul [] (List.map (renderLoadBalancing loadBalancing) (List.filter (\n -> n.app == "getip") commonModel.podList))
+    , Lists.ul [] (List.map (renderPod loadBalancing commonModel) (List.filter (\n -> n.app == "getip") commonModel.podList))
     ]
 
 
