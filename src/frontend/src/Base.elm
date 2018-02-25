@@ -1,8 +1,9 @@
-module Base exposing (ContainerInfo, PodInfo, CommonModel, ContainerStatusInfo, ContainerState (Running, Failed), renderButtonCell)
+module Base exposing (ContainerInfo, PodInfo, CommonModel, ContainerStatusInfo, ContainerState (Running, Failed), renderButtonCell, renderBadge)
 
 import Material
 import Material.Grid as Grid
 import Material.Button as Button
+import Material.Badge as Badge
 import Material.Options as Options exposing (css)
 import Html exposing (..)
 
@@ -44,4 +45,7 @@ renderButtonCell index model makeMdl msg actionText =
     Grid.cell [ Grid.size Grid.All 4 ] [ 
         Button.render makeMdl [ index ] model.mdl [ Button.raised, Button.colored, Button.ripple, Options.onClick msg ] [ text actionText ]
     ]
+
+renderBadge message badge =
+    Options.span [ Badge.add badge ] [ text message ]
 

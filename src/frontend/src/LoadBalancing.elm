@@ -50,7 +50,7 @@ renderLoadBalancing : Model -> PodInfo -> Html msg
 renderLoadBalancing loadBalancing pod =
     Lists.li [ Lists.withSubtitle ]
         [ Lists.content [] [ text (format1 "Pod {1}" pod.name), Lists.subtitle [] [ text pod.status ] ]
-        , Lists.content2 [] [ Options.span [ Badge.add (toString (List.Extra.count (\n -> n == pod.podIP) loadBalancing.responses)) ] [ text "Responses" ] ]
+        , Lists.content2 [] [ renderBadge "Responses" (toString (List.Extra.count (\n -> n == pod.podIP) loadBalancing.responses)) ]
         ]
 
 

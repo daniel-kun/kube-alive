@@ -60,7 +60,11 @@ renderPod pod =
                     Lists.subtitle [] [ text (format1 "Running since {1}" started)]
                 Failed _ reason message ->
                     Lists.subtitle [] [ text (format2 "Not running. {1}: {2}" (reason, message))]
-            ]
+            ],
+          Lists.content2 []
+              [
+                  renderBadge "Restarts" (toString pod.containerStatus.restartCount)
+              ]
         ]
 
 renderServiceState healthy =
@@ -70,7 +74,7 @@ renderServiceState healthy =
         Just False ->
             Options.styled p [ Typo.subhead, css "font-weight" "bold", css "color" "red" ] [ text "Service unhealthy" ]
         Nothing ->
-            Options.styled p [ Typo.subhead, css "font-weight" "bold", css "color" "gray" ] [ text "Checking health..." ]
+            Options.styled p [ Typo.subhead, css "font-weight" "bold", css "color" "gray" ] [ text "Waiting for service..." ]
 
 view : CommonModel -> Model -> List (Html Msg)
 view commonModel model =
