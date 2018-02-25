@@ -1,7 +1,7 @@
 module SelfHealing exposing (Model, Msg, init, update, view, subscriptions)
 
 import Base exposing (..)
-import String.Format exposing (format1)
+import String.Format exposing (format1, format2)
 import Html exposing (Html, h1, div, text, button, table, tr, td, span, p)
 import Html.Attributes exposing (style)
 import Html.Events exposing (onClick)
@@ -24,8 +24,8 @@ import Material.Grid as Grid
 type alias Model =
     { mdl : Material.Model
     , originHost : String
-    , x : Int
-    , healthy : Bool
+    , requestPending : Bool
+    , healthy : Maybe Bool
     }
 
 
@@ -47,24 +47,30 @@ type Msg
 
 
 init originHost =
-    Model Material.model originHost 0 True
+    Model Material.model originHost False Nothing
 
 
 renderPod : PodInfo -> Html msg
 renderPod pod =
     Lists.li [ Lists.withSubtitle ]
         [ Lists.content []
-            [ text (format1 "Pod {1}" pod.name)
-            , Lists.subtitle [] [ text pod.status ]
+            [ text (format1 "Pod {1}" pod.name),
+            case pod.containerStatus.state of
+                Running started ->
+                    Lists.subtitle [] [ text (format1 "Running since {1}" started)]
+                Failed _ reason message ->
+                    Lists.subtitle [] [ text (format2 "Not running. {1}: {2}" (reason, message))]
             ]
         ]
 
-
 renderServiceState healthy =
-    if (healthy) then
-        Options.styled p [ Typo.subhead, css "font-weight" "bold", css "color" "green" ] [ text "Service healthy" ]
-    else
-        Options.styled p [ Typo.subhead, css "font-weight" "bold", css "color" "red" ] [ text "Service unhealthy" ]
+    case healthy of
+        Just True ->
+            Options.styled p [ Typo.subhead, css "font-weight" "bold", css "color" "green" ] [ text "Service healthy" ]
+        Just False ->
+            Options.styled p [ Typo.subhead, css "font-weight" "bold", css "color" "red" ] [ text "Service unhealthy" ]
+        Nothing ->
+            Options.styled p [ Typo.subhead, css "font-weight" "bold", css "color" "gray" ] [ text "Checking health..." ]
 
 view : CommonModel -> Model -> List (Html Msg)
 view commonModel model =
@@ -87,22 +93,25 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         InfectService ->
-            ( model, (Http.send ServiceInfectOrKillResponse (Http.post (format1 "http://{1}/healthcheck/infect" model.originHost) Http.emptyBody (string))) )
+            ( { model | healthy = Nothing }, (Http.send ServiceInfectOrKillResponse (Http.post (format1 "http://{1}/healthcheck/infect" model.originHost) Http.emptyBody (string))) )
 
         KillService ->
-            ( model, (Http.send ServiceInfectOrKillResponse (Http.post (format1 "http://{1}/healthcheck/kill" model.originHost) Http.emptyBody (string))) )
+            ( { model | healthy = Nothing }, (Http.send ServiceInfectOrKillResponse (Http.post (format1 "http://{1}/healthcheck/kill" model.originHost) Http.emptyBody (string))) )
 
         ServiceInfectOrKillResponse _ ->
             ( model, Cmd.none )
 
         StatusPollTimer _ ->
-            ( { model | x = model.x + 1 }, (Http.send StatusPollResponse (Http.getString (format1 "http://{1}/healthcheck/" model.originHost))) )
+            if model.requestPending then
+                ( model, Cmd.none )
+            else
+                ( { model | requestPending = True }, (Http.send StatusPollResponse (Http.getString (format1 "http://{1}/healthcheck/" model.originHost))) )
 
         StatusPollResponse (Ok response) ->
-            ( { model | healthy = True }, Cmd.none )
+            ( { model | requestPending = False, healthy = Just True }, Cmd.none )
 
         StatusPollResponse (Err _) ->
-            ( { model | healthy = False }, Cmd.none )
+            ( { model | requestPending = False, healthy = Just False }, Cmd.none )
 
         Mdl msg_ ->
             Material.update Mdl msg_ model

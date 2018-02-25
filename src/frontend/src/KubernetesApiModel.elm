@@ -1,4 +1,4 @@
-module KubernetesApiModel exposing (KubernetesResultMetadata, KubernetesPodResult, KubernetesPodItem, KubernetesPodSpec, KubernetesPodMetadata, KubernetesLabels, KubernetesPodStatus, KubernetesPodCondition, KubernetesPodUpdate, KubernetesContainerItem)
+module KubernetesApiModel exposing (..)
 
 type alias KubernetesResultMetadata = {
     resourceVersion: String
@@ -40,7 +40,8 @@ type alias KubernetesPodStatus = {
   phase: String,
   conditions: Maybe (List KubernetesPodCondition),
   hostIP: Maybe String,
-  podIP: Maybe String
+  podIP: Maybe String,
+  containerStatuses: Maybe (List KubernetesContainerStatusItem)
 }
 
 type alias KubernetesPodCondition = {
@@ -51,5 +52,24 @@ type alias KubernetesPodCondition = {
 type alias KubernetesContainerItem = {
     name: String,
     image: String
+}
+
+type alias KubernetesContainerStateDetails = {
+    startedAt : Maybe String,
+    reason : Maybe String,
+    message : Maybe String
+}
+
+type alias KubernetesContainerStateItem = {
+    waiting : Maybe KubernetesContainerStateDetails,
+    terminating : Maybe KubernetesContainerStateDetails,
+    running : Maybe KubernetesContainerStateDetails
+}
+
+type alias KubernetesContainerStatusItem = {
+    name: String,
+    state : KubernetesContainerStateItem,
+    ready : Bool,
+    restartCount : Int
 }
 

@@ -1,4 +1,4 @@
-module Base exposing (ContainerInfo, PodInfo, CommonModel, renderButtonCell)
+module Base exposing (ContainerInfo, PodInfo, CommonModel, ContainerStatusInfo, ContainerState (Running, Failed), renderButtonCell)
 
 import Material
 import Material.Grid as Grid
@@ -12,6 +12,16 @@ type alias ContainerInfo = {
         name : String,
         image : String
     }
+    
+type ContainerState = 
+      Running String -- startedAt
+    | Failed String String String -- startedAt, reason, message
+
+type alias ContainerStatusInfo = {
+        restartCount : Int,
+        ready : Bool,
+        state : ContainerState
+    }
 
 type alias PodInfo =
     { name: String
@@ -20,6 +30,7 @@ type alias PodInfo =
     , status: String
     , podIP: String
     , containers : List ContainerInfo
+    , containerStatus : ContainerStatusInfo 
     }
 
 type alias CommonModel = {

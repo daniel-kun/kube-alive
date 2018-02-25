@@ -5,11 +5,14 @@ import Base exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick)
 import String.Format exposing (format1, format2)
+import String exposing (toInt)
+import Maybe exposing (withDefault)
 import WebSocket
 import Http exposing (get, send)
-import KubernetesApiModel exposing (KubernetesResultMetadata, KubernetesPodResult, KubernetesPodItem, KubernetesPodMetadata, KubernetesLabels, KubernetesPodStatus, KubernetesPodCondition, KubernetesPodUpdate)
+import KubernetesApiModel exposing (..)
 import KubernetesApiDecoder exposing (decodeKubernetesPodResult, decodeKubernetesPodUpdate)
 import Json.Decode exposing (decodeString)
+import List.Extra exposing (last)
 import LoadBalancing
 import SelfHealing
 import AutoScaling
@@ -104,9 +107,36 @@ makePodIP item =
 makeContainerInfo container =
     ContainerInfo container.name container.image
 
+makeContainerState : KubernetesContainerStateItem -> ContainerState
+makeContainerState state =
+    case state.running of
+        Just details ->
+            Running (withDefault "" details.startedAt)
+        Nothing ->
+            case state.terminating of
+                Just details ->
+                    Failed (withDefault "" details.startedAt) (withDefault "" details.reason) (withDefault "" details.message)
+                Nothing ->
+                    case state.waiting of
+                        Just details ->
+                            Failed (withDefault "" details.startedAt) (withDefault "" details.reason) (withDefault "" details.message)
+                        Nothing ->
+                            Failed "" "" ""
+
+makeContainerStatus : List KubernetesContainerStatusItem -> ContainerStatusInfo
+makeContainerStatus statuses =
+    case statuses of
+        a :: _ ->
+            (ContainerStatusInfo 
+                 a.restartCount
+                 a.ready
+                 (makeContainerState a.state))
+        [] ->
+            (ContainerStatusInfo 0 False (Failed "" "Pending" "Pod starting..."))
+
 makePodInfo : KubernetesPodItem -> PodInfo
 makePodInfo item =
-    PodInfo item.metadata.name item.metadata.uid item.metadata.labels.app (makePodInfoStatus item) (makePodIP item) (List.map makeContainerInfo item.spec.containers)
+    PodInfo item.metadata.name item.metadata.uid item.metadata.labels.app (makePodInfoStatus item) (makePodIP item) (List.map makeContainerInfo item.spec.containers) (makeContainerStatus (withDefault [] item.status.containerStatuses))
 
 
 makePodList : KubernetesPodResult -> List PodInfo
@@ -161,8 +191,8 @@ update msg model =
             PodList (Ok newPodList) ->
                 ( { model | debugText = "Loaded.", commonModel = { commonModel | podList = makePodList newPodList }, podListResourceVersion = newPodList.metadata.resourceVersion }, Cmd.none )
 
-            PodList (Err _) ->
-                ( { model | debugText = "Fetch error" }, Cmd.none )
+            PodList (Err err) ->
+                ( { model | debugText = (format1 "Fetch error: {1}" err) }, Cmd.none )
 
             PodUpdate jsonResponse ->
                 let
@@ -241,7 +271,8 @@ renderMain model =
 
         SelfHealingTab ->
             div [ style [ ( "margin", "20px" ), ( "padding", "15px" ) ] ]
-                (List.map (Html.map SelfHealingMsg) (SelfHealing.view model.commonModel model.selfHealing))
+                ([ text model.debugText ] ++
+                (List.map (Html.map SelfHealingMsg) (SelfHealing.view model.commonModel model.selfHealing)))
 
         AutoScalingTab ->
             div [ style [ ( "margin", "20px" ), ( "padding", "15px" ) ] ]

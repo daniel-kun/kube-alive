@@ -23,6 +23,7 @@ type alias Model =
     { mdl : Material.Model
     , originHost : String
     , version : String
+    , requestPending : Bool
     , failedRequests : Int
     }
 
@@ -44,7 +45,7 @@ type Msg
 
 
 init originHost =
-    Model Material.model originHost "" 0
+    Model Material.model originHost "" False 0
 
 getPodVersion pod =
     case pod.containers of
@@ -94,7 +95,14 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         StartServiceUpdate ->
-            ( { model | failedRequests = 0 }, (Http.send (\m -> StartServiceResponse m) (Http.getString (format1 "http://{1}/incver/start" model.originHost))) )
+            if model.requestPending then
+                ( model, Cmd.none )
+            else
+                ( 
+                    { model | requestPending = True, failedRequests = 0 }, 
+                    (Http.send 
+                        (\m -> StartServiceResponse m) 
+                        (Http.getString (format1 "http://{1}/incver/start" model.originHost))) )
 
         StartServiceResponse (Ok _) ->
             ( model, Cmd.none )
@@ -103,10 +111,10 @@ update msg model =
             ( model, Cmd.none )
 
         ReceiveVersionResponse (Ok version) ->
-            ( { model | version = version }, Cmd.none )
+            ( { model | requestPending = False, version = version }, Cmd.none )
 
         ReceiveVersionResponse (Err _) ->
-            ( { model | failedRequests = model.failedRequests + 1 }, Cmd.none )
+            ( { model | requestPending = False, failedRequests = model.failedRequests + 1 }, Cmd.none )
 
         VersionPollTimer _ ->
             ( model, (Http.send (\m -> ReceiveVersionResponse m) (Http.getString (format1 "http://{1}/incver/version" model.originHost))) )
