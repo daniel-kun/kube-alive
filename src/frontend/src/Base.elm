@@ -5,6 +5,7 @@ import Date
 import Date.Distance as Distance
 import Material
 import Material.Grid as Grid
+import Material.Chip as Chip
 import Material.Button as Button
 import Material.Badge as Badge
 import Material.Options as Options exposing (css)
@@ -51,7 +52,7 @@ renderButtonCell index model makeMdl msg actionText =
     ]
 
 renderBadge message badge =
-    Options.span [ Badge.add badge ] [ text message ]
+    Chip.button [ ] [ Chip.content [ css "width" "10rem" ] [ text (format2 "{1}: {2}" (message, badge)) ] ]
 
 getPodState pod commonModel =
     case pod.containerStatus.state of
