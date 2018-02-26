@@ -279,8 +279,7 @@ renderMain model =
 
         SelfHealingTab ->
             div [ style [ ( "margin", "20px" ), ( "padding", "15px" ) ] ]
-                ([ text model.debugText ] ++
-                (List.map (Html.map SelfHealingMsg) (SelfHealing.view model.commonModel model.selfHealing)))
+                (List.map (Html.map SelfHealingMsg) (SelfHealing.view model.commonModel model.selfHealing))
 
         AutoScalingTab ->
             div [ style [ ( "margin", "20px" ), ( "padding", "15px" ) ] ]
