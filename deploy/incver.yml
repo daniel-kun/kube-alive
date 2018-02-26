@@ -62,8 +62,6 @@ spec:
           value: %%BRANCH_SUFFIX%%
         - name: ARCHSUFFIX
           value: %%ARCHSUFFIX%%
-        securityContext:
-          privileged: true
         ports:
         - containerPort: 8080
 ---
