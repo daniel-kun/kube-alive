@@ -22,7 +22,7 @@ func main() {
         text := vars["text"]
         ioutil.WriteFile("text", []byte(text), 0600)
 	})
-	fmt.Printf("'storer' server starting, listening to 8080 on all interfaces.\n")
+	fmt.Printf("'phoenix' server starting, listening to 8080 on all interfaces.\n")
 	http.ListenAndServe(":8080", router)
 }
 
