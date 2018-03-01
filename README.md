@@ -32,23 +32,17 @@ This will install the required resources into the `kube-alive` Kubernetes namesp
 
 Behaviours of k8s that can be observed "live":
 
-## Load-Balancing
-When a ReplicaSet with multiple Pods exists, see how results are served from different Pods via Kubernete's load balancing. Each Pod returns it's IP address and the Frontend shows you how many of your requests have been made by which Pod.
-
 ![Experiment 1 Demo](docs/demo-experiment-1.gif)
 
-## Self-Healing
-When an app crashes or becomes unhealthy (via health-check), see how the Pod is restarted and becomes healthy again.
+---
 
 ![Experiment 2 Demo](docs/demo-experiment-2.gif)
 
-## Rolling updates 
-When a deployment is updated, you see that new Pods with new versions are created and then the old Pods are killed, without a failed request by the frontend.
+---
 
 ![Experiment 3 Demo](docs/demo-experiment-3.gif)
 
-## Auto-Scale
-When traffic can not be served with the current number of Pods and CPU usage exceeds 50%, more Pods are created automatically to serve more requests, faster.
+---
 
 ![Experiment 4 Demo](docs/demo-experiment-4.gif)
 
