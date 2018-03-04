@@ -32,12 +32,14 @@ pushMultiArch ()
 {
     TEMPSPEC=`tempfile`
     docker images | grep -e "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_arm32v7 *$2" > /dev/zero && docker push "${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_arm32v7:$2"
+    docker images | grep -e "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_arm64v8 *$2" > /dev/zero && docker push "${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_arm64v8:$2"
     docker images | grep -e "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_amd64 *$2" > /dev/zero && docker push "${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_amd64:$2"
     sed "s/%%KUBEALIVE_DOCKER_REPO%%/${KUBEALIVE_DOCKER_REPO}/g" src/$1/multiarch.templspec | sed "s/%%BRANCH_SUFFIX%%/${BRANCH_SUFFIX}/" | \
         sed "s/%%TAG%%/$2/g" > "${TEMPSPEC}" 
 
     if docker images | grep -E "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_arm32v7 *$2" && \
-        docker images | grep -E "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_amd64 *$2"; then
+        docker images | grep -E "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_amd64 *$2" && \
+           docker images | grep -E "^${KUBEALIVE_DOCKER_REPO}/$1${BRANCH_SUFFIX}_arm64v8 *$2" ; then
         if manifest-tool push from-spec "${TEMPSPEC}"; then
             echo "Successfully pushed '$1' multiarch container."
         else

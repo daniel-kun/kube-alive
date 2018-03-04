@@ -228,7 +228,6 @@ func main() {
             }
         }
     })
-    http.Handle("/", http.FileServer(http.Dir("./static")))
 	fmt.Printf("'incver' server v%s starting, listening to 8080 on all interfaces.\n", getVersion())
 	http.ListenAndServe(":8080", nil)
 }

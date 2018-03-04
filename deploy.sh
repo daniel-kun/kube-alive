@@ -37,10 +37,14 @@ ARCHSUFFIX=
 LOCAL=0
 if [ $# -eq 1 ] && [ $1 = "local" ]; then
     LOCAL=1
-    if uname -a | grep arm > /dev/null; then
-        ARCHSUFFIX=_arm32v7
+    if uname -a | grep arm64 > /dev/null; then
+        ARCHSUFFIX=_arm64v8
     else
-        ARCHSUFFIX=_amd64
+        if uname -a | grep arm > /dev/null; then
+            ARCHSUFFIX=_arm32v7
+        else
+            ARCHSUFFIX=_amd64
+        fi
     fi
 
     echo "Deploying locally for architecture ${ARCHSUFFIX} from deploy/."

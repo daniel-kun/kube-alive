@@ -5,6 +5,7 @@ build:
 
 cross-build:
 	build/build.sh arm32v7
+	build/build.sh arm64v8
 	build/build.sh amd64
 
 push:
