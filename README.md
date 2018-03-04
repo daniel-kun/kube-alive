@@ -10,9 +10,10 @@ You should have a k8s cluster up and running to deploy the tools from this repos
 kube-alive is tested on the following platforms, with Kubernetes version 1.8 and 1.9:
 
 - Minikube (see [official guide](https://kubernetes.io/docs/getting-started-guides/minikube/))
-- Bare metal on a Raspberry Pi 3 cluster (see [a guide by Scott Hanselman](https://www.hanselman.com/blog/HowToBuildAKubernetesClusterWithARMRaspberryPiThenRunNETCoreOnOpenFaas.aspx))
 - Microsoft Azure Container Service AKS (see [official guide](https://docs.microsoft.com/en-us/azure/aks/intro-kubernetes#using-azure-container-service-aks))
 - Google Kubernetes Engine GKE (see [official guide](https://cloud.google.com/kubernetes-engine/docs/quickstart))
+- Bare metal arm32v7-cluster based on Raspberry Pi 3 (see [a guide by Scott Hanselman](https://www.hanselman.com/blog/HowToBuildAKubernetesClusterWithARMRaspberryPiThenRunNETCoreOnOpenFaas.aspx))
+- Bare metal arm64v8-cluster on https://www.packet.net/ (Type 2A on location EWR1 - thanks to [packet.net](https://www.packet.net/) for sponsoring hardware to help port kube-alive)
 
 ## Deployment
 
