@@ -19,7 +19,8 @@ kube-alive is tested on the following platforms, with Kubernetes version 1.8 and
 
 *Prerequisites:*
 * You need to have `kubectl` installed and configured to point at a running cluster that you have admin access to.
-* If you are running on Google Kubernetes Engine, your default account does not have the privilege to grant more privileges. To circumvent this, you can grant yourself cluster-admin rights: `kubectl create clusterrolebinding root-cluster-admin-binding --clusterrole=cluster-admin --user=<your-google-mail-address>`
+* If you are running on Google Kubernetes Engine, your default account does not have the privilege to grant more privileges. To circumvent this, you can grant yourself cluster-admin rights: `kubectl create clusterrolebinding cluster-admin-binding \
+--clusterrole cluster-admin --user $(gcloud config get-value account)`
 
 You can deploy kube-alive to your local cluster with this single command:
 
